@@ -1,0 +1,10 @@
+﻿[*.cs]
+
+# CA1305: IFormatProvider angeben
+dotnet_diagnostic.CA1305.severity = silent
+
+# CA1307: StringComparison angeben
+dotnet_diagnostic.CA1307.severity = silent
+
+# CA1303: Literale nicht als lokalisierte Parameter übergeben
+dotnet_diagnostic.CA1303.severity = silent

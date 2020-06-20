@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>assets/icons/artify.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PropertyChanged.Fody" Version="3.2.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ArtAPI\ArtAPI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="assets\icons\artify.png" />
+    <Resource Include="assets\icons\artify2.png" />
+    <Resource Include="assets\icons\check_box.png" />
+    <Resource Include="assets\icons\check_box_outline_blank.png" />
+    <Resource Include="assets\icons\close.png" />
+    <Resource Include="assets\icons\close_fullscreen.png" />
+    <Resource Include="assets\icons\maximize.png" />
+    <Resource Include="assets\icons\minimize.png" />
+    <Resource Include="assets\icons\open_in_full.png" />
+    <Resource Include="assets\icons\settings.png" />
+    <Resource Include="assets\logos\ArtStation-logomark-white.png" />
+    <Resource Include="assets\logos\pixiv_logo.png" />
+  </ItemGroup>
+
+</Project>
