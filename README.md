@@ -1,4 +1,4 @@
-# Artify
+# Artify ![Artify](https://raw.githubusercontent.com/sentouki/Artify/master/Artify/assets/icons/artify.png)
 ###### a fun project of mine
 
 ## Description
@@ -6,7 +6,7 @@ Artify allows you to easily download artwork from an artist.
 The App uses ArtAPI lib which is also part of this project.
 
 ## Using
-You can download the precompiled version or clone this repo and build it yourself  
+You can download the [precompiled version](https://github.com/sentouki/Artify/releases) or clone this repo and build it yourself  
 It is very easy to use, just choose a platform, paste a URL of the profile of an artist  
 and press **Download**    
 
@@ -23,6 +23,7 @@ and press **Download**
 
 #### Running the app
 - [.NET Core 3.1 Runtime](https://dotnet.microsoft.com/download/visual-studio-sdks)
+- or download the [self-contained version](https://github.com/sentouki/Artify/releases/download/v1.0.0/Artify.selfcontained.zip)
 
 #### Building the App
 - [.NET Core 3.1 SDK](https://dotnet.microsoft.com/download/visual-studio-sdks)
