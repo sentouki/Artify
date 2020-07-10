@@ -74,7 +74,11 @@ namespace ArtAPI
                 {
                     ImagesToDownload.Add(new ImageModel()
                     {
-                        Url = image["image_url"].ToString(),
+                        Url = image["image_url"].ToString().Replace("/large/", "/4k/")
+                                                           .Replace("/covers/", "/images/")
+                                                           .Replace("/video_clips/", "/images/")
+                                                           .Replace("/videos/","/images/")
+                                                           .Replace("/panos/", "/images/"),     // workaround to download 4k images, maybe there's a better way, I might change this later
                         Name = name,
                         ID = image["id"].ToString()
                     });
