@@ -56,11 +56,6 @@ namespace ArtAPI
             return JObject.Parse(response)["body"]["user_details"]["user_name"].ToString();
         }
 
-        public override async Task GetImagesAsync(string ArtistUrl)
-        {
-            await GetImagesAsync(new Uri(ArtistUrl)).ConfigureAwait(false);
-        }
-
         public override async Task GetImagesAsync(Uri artistUrl)
         {
             OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadPreparing));
@@ -75,6 +70,7 @@ namespace ArtAPI
             {
                 await GetImagesMetadataAsync(string.Format(APIUrlWithoutLogin, artistID)).ConfigureAwait(false);
             }
+            await DownloadImagesAsync().ConfigureAwait(false);
         }
 
         protected override async Task GetImagesMetadataAsync(string apiUrl)
@@ -114,7 +110,6 @@ namespace ArtAPI
             {
                 OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadCanceled, e.Message));
             }
-            await DownloadImagesAsync().ConfigureAwait(false);
         }
 
         private async Task GetImageURLsWithoutLoginAsync(string illustProject)

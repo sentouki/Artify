@@ -94,10 +94,13 @@
                     <Style TargetType="{x:Type Image}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding SelectedPlatform}" Value="artstation">
-                                <Setter Property="Source" Value="../assets/logos/ArtStation-logomark-white.png"/>
+                                <Setter Property="Source" Value="../assets/logos/artstation_logo.png"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding SelectedPlatform}" Value="pixiv">
                                 <Setter Property="Source" Value="../assets/logos/pixiv_logo.png"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding SelectedPlatform}" Value="deviantart">
+                                <Setter Property="Source" Value="../assets/logos/deviantart_logo.png"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -117,7 +120,10 @@
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Tag="artstation" Click="SelectionMenuButton_Click" Style="{StaticResource SelectPlatformMenu}">
-                    <Image Source="../assets/logos/ArtStation-logomark-white.png"/>
+                    <Image Source="../assets/logos/artstation_logo.png"/>
+                </Button>
+                <Button Tag="deviantart" Click="SelectionMenuButton_Click" Style="{StaticResource SelectPlatformMenu}">
+                    <Image Source="../assets/logos/deviantart_logo.png"/>
                 </Button>
                 <Button Tag="pixiv" Click="SelectionMenuButton_Click" Style="{StaticResource SelectPlatformMenu}">
                     <Image Source="../assets/logos/pixiv_logo.png"/>

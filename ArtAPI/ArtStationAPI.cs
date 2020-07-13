@@ -20,11 +20,6 @@ namespace ArtAPI
             return response.IsSuccessStatusCode;
         }
 
-        public override async Task GetImagesAsync(string artistUrl)
-        {
-            await GetImagesAsync(new Uri(artistUrl)).ConfigureAwait(false);
-        }
-
         public override async Task GetImagesAsync(Uri artistUrl)
         {
             OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadPreparing));
@@ -32,6 +27,7 @@ namespace ArtAPI
             if (artistname == null) return;
             CreateSaveDir(artistname);
             await GetImagesMetadataAsync(string.Format(ApiUrl, artistname)).ConfigureAwait(false);
+            await DownloadImagesAsync().ConfigureAwait(false);
         }
 
         protected override async Task GetImagesMetadataAsync(string apiUrl)
@@ -60,7 +56,6 @@ namespace ArtAPI
             try { await t.ConfigureAwait(false); }
             catch (Exception e)
             { OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadCanceled, e.Message)); return; }
-            await DownloadImagesAsync().ConfigureAwait(false);
         }
 
         // get all the images from a project

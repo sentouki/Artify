@@ -27,13 +27,15 @@ namespace Artify
         {
             {"general", new Regex(@"(https?://)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}(\/?[a-zA-Z0-9]*\/?)*") },
             {"artstation", new Regex(@"(https://)?(www\.)?artstation\.com/[0-9a-zA-Z]+/?") },
-            {"pixiv", new Regex(@"(https://)?(www\.)?pixiv\.net/[a-z]{0,6}/users/[0-9]+/?") }
+            {"pixiv", new Regex(@"(https://)?(www\.)?pixiv\.net/[a-z]{0,6}/users/[0-9]+/?") },
+            {"deviantart", new Regex(@"(https://)?(www\.)?deviantart\.com/[0-9a-zA-Z]+/?")}
         };
         // container for the classes
         private readonly Dictionary<string, Func<IRequestArt>> ArtPlatform = new Dictionary<string, Func<IRequestArt>>()
         {
             { "artstation", () => new ArtStationAPI() },
-            { "pixiv", () => new PixivAPI() }
+            { "pixiv", () => new PixivAPI() },
+            { "deviantart", () => new DeviantArtAPI()}
         };
         public IRequestArt Platform
         {

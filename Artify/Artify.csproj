@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="assets\logos\artstation_logo.png" />
+    <None Remove="assets\logos\deviantart_logo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="PropertyChanged.Fody" Version="3.2.8" />
   </ItemGroup>
 
@@ -17,7 +22,6 @@
 
   <ItemGroup>
     <Resource Include="assets\icons\artify.png" />
-    <Resource Include="assets\icons\artify2.png" />
     <Resource Include="assets\icons\check_box.png" />
     <Resource Include="assets\icons\check_box_outline_blank.png" />
     <Resource Include="assets\icons\close.png" />
@@ -26,7 +30,8 @@
     <Resource Include="assets\icons\minimize.png" />
     <Resource Include="assets\icons\open_in_full.png" />
     <Resource Include="assets\icons\settings.png" />
-    <Resource Include="assets\logos\ArtStation-logomark-white.png" />
+    <Resource Include="assets\logos\artstation_logo.png" />
+    <Resource Include="assets\logos\deviantart_logo.png" />
     <Resource Include="assets\logos\pixiv_logo.png" />
   </ItemGroup>
 

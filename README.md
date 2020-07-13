@@ -1,7 +1,7 @@
 # Artify ![Artify](https://raw.githubusercontent.com/sentouki/Artify/master/Artify/assets/icons/artify.png)
 ###### a fun project of mine
 ## Description
-Artify allows you to easily download artwork from an artist.  
+Artify allows you to easily download artwork of an artist from a platform of your choice.  
 The App uses ArtAPI lib which is also part of this project.
 
 ## Using
@@ -13,7 +13,7 @@ Press ***ESC*** to select another platform
 #### Available platforms
 - [x] ArtStation
 - [x] Pixiv (with & without login¹)
-- [ ] DeviantArt
+- [x] DeviantArt
 
 ##### Warning  
 - Do NOT overuse this program as the platforms may ban your IP (or even your account if you're logged in)
@@ -36,6 +36,7 @@ Please feel free to submit any feedback or issues you have
 - [ArtStation Logo](https://www.artstation.com/about/logo)
 - [Pixiv Logo](https://commons.wikimedia.org/wiki/File:Pixiv_Icon.svg)
 - [Research on the Pixiv OAuth API](https://github.com/azuline/pixiv-api)
+- [DeviantArt API](https://www.deviantart.com/developers/http/v1/20200519)
 - [UI icons](https://material.io/resources/icons/)
 -------------------
 
