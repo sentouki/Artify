@@ -23,7 +23,7 @@ Press ***ESC*** to select another platform
 
 #### Running the app
 - [.NET Core 3.1 Runtime](https://dotnet.microsoft.com/download/visual-studio-sdks)
-- or download the [self-contained version](https://github.com/sentouki/Artify/releases/download/v1.0.0/Artify.selfcontained.zip)
+- or download the [self-contained version](https://github.com/sentouki/Artify/releases/download/v1.1.0/Artify.selfcontained.zip)
 
 #### Building the app
 - [.NET Core 3.1 SDK](https://dotnet.microsoft.com/download/visual-studio-sdks)

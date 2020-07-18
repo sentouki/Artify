@@ -30,8 +30,7 @@ namespace Artify
             MaxHeight = SystemParameters.WorkArea.Height + 10;
             MaxWidth = SystemParameters.WorkArea.Width + 10;
             Opacity = 0;
-            //MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
-            //MaxWidth = SystemParameters.MaximizedPrimaryScreenWidth;
+            ResizeButton.DataContext = this;
         }
 
         private void SetupEventHandlers()
@@ -67,6 +66,10 @@ namespace Artify
             if ((e.Key == System.Windows.Input.Key.Escape) && SelectionMenu.Visibility == Visibility.Hidden)
             {
                 ShowSelectionMenu();
+            }
+            else if ((e.Key == System.Windows.Input.Key.Escape) && SelectionMenu.Visibility == Visibility.Visible && SelectedPlatformIcon.Source != null)
+            {
+                HideSelectionMenu();
             }
         }
         private void WindowChromeOnMouseDown(object sender, MouseButtonEventArgs e)

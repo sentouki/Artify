@@ -36,7 +36,20 @@
                     <Image Width="20" Source="../assets/icons/close.png"/>
                 </Button>
                 <Button x:Name="ResizeButton" Style="{StaticResource WindowChromeButton}" Width="50" Click="ResizeButton_Click" >
-                    <Image Width="20" Source="../assets/icons/open_in_full.png"/>
+                    <Image Width="20" FlowDirection="LeftToRight">
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding WindowState}" Value="0">
+                                        <Setter Property="Source" Value="../assets/icons/open_in_full.png"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding WindowState}" Value="2">
+                                        <Setter Property="Source" Value="../assets/icons/close_fullscreen.png"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
                 </Button>
                 <Button x:Name="MinimizeButton" Style="{StaticResource WindowChromeButton}" Width="50" Click="MinimizeButton_Click">
                     <Image Width="28" Source="../assets/icons/minimize.png"/>
@@ -89,7 +102,7 @@
                 </Grid.RowDefinitions>
                 <TextBlock x:Name="Notification" Text="{Binding Notification}" Grid.Row="0" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="23" TextWrapping="Wrap" TextAlignment="Center"/>
             </Grid>
-            <Image Grid.Column="1" Grid.Row="0" Margin="25">
+            <Image x:Name="SelectedPlatformIcon" Grid.Column="1" Grid.Row="0" Margin="25">
                 <Image.Style>
                     <Style TargetType="{x:Type Image}">
                         <Style.Triggers>
@@ -106,7 +119,7 @@
                     </Style>
                 </Image.Style>
             </Image>
-            <Button Grid.Column="2" Grid.Row="0" Style="{StaticResource WindowChromeButton}" Background="Transparent" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,-5,5,0" Click="SettingsClick" >
+            <Button Grid.Column="2" Grid.Row="0" Style="{StaticResource SettingsButton}" Background="Transparent" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,-5,5,0" Click="SettingsClick" >
                 <Image Width="25" Source="../assets/icons/settings.png"/>
             </Button>
         </Grid>
