@@ -174,9 +174,7 @@ namespace ArtAPI
         protected async Task DownloadAsync(ImageModel image, string savePath)
         {
             if (image == null) return;
-            var specialChars = new List<string>() { @"\", "/", ":", "*", "?", "\"", "<", ">", "|" };
-            var imageName = image.Name;
-            specialChars.ForEach(c => imageName = imageName.Replace(c, ""));  // remove all the nasty characters that can cause trouble
+            var imageName = NormalizeFileName(image.Name);
             var imageSavePath = Path.Combine(savePath, $"{imageName}_{image.ID}.{image.FileType}");
             const int tries = NumberOfDLAttempts;
             try
@@ -228,7 +226,17 @@ namespace ArtAPI
         private void CheckLocalImages()
         {
             var localImages = Directory.GetFiles(ArtistDirSavepath).Select(Path.GetFileNameWithoutExtension).ToArray();
-            ImagesToDownload.RemoveAll(image => localImages.Contains($"{image.Name}_{image.ID}"));
+            ImagesToDownload.RemoveAll(image => localImages.Contains($"{NormalizeFileName(image.Name)}_{image.ID}"));
+        }
+        /// <summary>
+        /// remove all the nasty characters that can cause trouble
+        /// </summary>
+        /// <returns>normalized file name</returns>
+        private string NormalizeFileName(string filename)
+        {
+            var specialChars = new List<string>() { @"\", "/", ":", "*", "?", "\"", "<", ">", "|" };
+            specialChars.ForEach(c => filename = filename.Replace(c, ""));
+            return filename;
         }
 
         public void CancelDownload()
