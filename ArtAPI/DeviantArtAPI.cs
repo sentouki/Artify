@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -60,9 +61,9 @@ namespace ArtAPI
                     {
                         Url = image["content"]["src"].ToString(),
                         Name = image["title"].ToString(),
-                        ID = image["deviationid"].ToString()
-                    }
-                        );
+                        ID = image["deviationid"].ToString(),
+                        FileType = image["content"]["src"].ToString().Split('?')[0].Split('/').Last().Split('.')[1]  // maybe not the best way but surely the the easiest one
+                    });
                 }
                 if (responseJson["has_more"].ToString() == "False") return;
                 paginationOffset += Offset;
@@ -71,6 +72,7 @@ namespace ArtAPI
 
         public override async Task<bool> auth(string refreshToken)
         {
+            if (IsLoggedIn) return true;
             var data = new Dictionary<string, string>()
             {
                 {"grant_type", "client_credentials" },
@@ -83,6 +85,8 @@ namespace ArtAPI
                 var response = await Client.PostAsync(AUTH_URL, content).ConfigureAwait(false);
                 var jsonResponse = JObject.Parse(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
                 if (jsonResponse["status"].ToString() == "error") return false;
+                if (Client.DefaultRequestHeaders.Contains("Authorization"))
+                    Client.DefaultRequestHeaders.Remove("Authorization");
                 Client.DefaultRequestHeaders.Add("Authorization", $"Bearer {jsonResponse["access_token"]}");
             }
             catch(HttpRequestException)

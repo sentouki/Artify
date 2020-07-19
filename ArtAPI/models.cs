@@ -17,5 +17,9 @@
         /// platform-specific(Artstation, Deviantart, Pixiv...etc) ID of the image
         /// </summary>
         public string ID { get; set; }
+        /// <summary>
+        /// file type of the image (png, jpg, gif)
+        /// </summary>
+        public string FileType { get; set; } = "jpg";
     }
 }

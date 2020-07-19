@@ -126,11 +126,8 @@ namespace ArtAPI
                         {
                             Url = img_url["url_big"].ToString(),
                             Name = illustDetails["title"].ToString(),
-                            ID = img_url["url_big"].ToString()
-                                                   .Split('/')
-                                                   .Last()
-                                                   .Replace(".png", string.Empty)
-                                                   .Replace(".jpg", string.Empty)
+                            ID = img_url["url_big"].ToString().Split('/').Last().Split('.')[0],
+                            FileType = img_url["url_big"].ToString().Split('/').Last().Split('.')[1]
                         });
                     }
                 }
@@ -143,7 +140,8 @@ namespace ArtAPI
                     {
                         Url = illustDetails["url_big"].ToString(),
                         Name = illustDetails["title"].ToString(),
-                        ID = illustDetails["id"].ToString()
+                        ID = illustDetails["id"].ToString(),
+                        FileType = illustDetails["url_big"].ToString().Split('/').Last().Split('.')[1]
                     });
                 }
             }
@@ -157,27 +155,31 @@ namespace ArtAPI
                 {
                     foreach (var img_url in IllustDetails["meta_pages"])
                     {
-                        ImagesToDownload.Add(new ImageModel()
+                        lock (ImagesToDownload)
                         {
-                            Url = img_url["image_urls"]["original"].ToString(),
-                            Name = IllustDetails["title"].ToString(),
-                            ID = img_url["image_urls"]["original"].ToString()
-                                .Split('/')
-                                .Last()
-                                .Replace(".png", string.Empty)
-                                .Replace(".jpg", string.Empty)
-                        });
+                            ImagesToDownload.Add(new ImageModel()
+                            {
+                                Url = img_url["image_urls"]["original"].ToString(),
+                                Name = IllustDetails["title"].ToString(),
+                                ID = img_url["image_urls"]["original"].ToString().Split('/').Last().Split('.')[0],
+                                FileType = img_url["image_urls"]["original"].ToString().Split('/').Last().Split('.')[1]
+                            });
+                        }
 
                     }
                 }
                 else
                 {
-                    ImagesToDownload.Add(new ImageModel()
+                    lock (ImagesToDownload)
                     {
-                        Url = IllustDetails["meta_single_page"]["original_image_url"].ToString(),
-                        Name = IllustDetails["title"].ToString(),
-                        ID = IllustDetails["id"].ToString()
-                    });
+                        ImagesToDownload.Add(new ImageModel()
+                        {
+                            Url = IllustDetails["meta_single_page"]["original_image_url"].ToString(),
+                            Name = IllustDetails["title"].ToString(),
+                            ID = IllustDetails["id"].ToString(),
+                            FileType = IllustDetails["meta_single_page"]["original_image_url"].ToString().Split('/').Last().Split('.')[1]
+                        });
+                    }
 
                 }
             }
@@ -185,6 +187,7 @@ namespace ArtAPI
 
         public override async Task<bool> auth(string refreshToken)
         {
+            if (IsLoggedIn) return true;
             var clientTime = DateTime.UtcNow.ToString("s") + "+00:00";
             var data = new Dictionary<string, string>()
             {
@@ -208,6 +211,8 @@ namespace ArtAPI
                 var accessToken = jsonResponse["response"]["access_token"]?.ToString() ??
                                   throw new Exception("Bad API Response");
                 RefreshToken = jsonResponse["response"]["refresh_token"].ToString();
+                if (Client.DefaultRequestHeaders.Contains("Authorization"))
+                    Client.DefaultRequestHeaders.Remove("Authorization");
                 Client.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
             }
             catch (HttpRequestException)
@@ -243,6 +248,8 @@ namespace ArtAPI
                 var accessToken = jsonResponse["response"]["access_token"]?.ToString() ??
                                   throw new Exception("Bad API Response");
                 RefreshToken = jsonResponse["response"]["refresh_token"].ToString();
+                if (Client.DefaultRequestHeaders.Contains("Authorization"))
+                    Client.DefaultRequestHeaders.Remove("Authorization");
                 Client.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
             }
             catch (HttpRequestException)

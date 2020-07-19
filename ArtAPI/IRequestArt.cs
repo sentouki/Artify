@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -131,6 +132,7 @@ namespace ArtAPI
                 OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadCanceled, "No images to download"));
                 Clear(); return;
             }
+            CheckLocalImages();
             OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadRunning, TotalImageCount: TotalImageCount));
             cts = new CancellationTokenSource();
             using var ss = new SemaphoreSlim(ConcurrentTasks);
@@ -175,7 +177,7 @@ namespace ArtAPI
             var specialChars = new List<string>() { @"\", "/", ":", "*", "?", "\"", "<", ">", "|" };
             var imageName = image.Name;
             specialChars.ForEach(c => imageName = imageName.Replace(c, ""));  // remove all the nasty characters that can cause trouble
-            var imageSavePath = Path.Combine(savePath, $"{imageName}_{image.ID}.jpg");
+            var imageSavePath = Path.Combine(savePath, $"{imageName}_{image.ID}.{image.FileType}");
             const int tries = NumberOfDLAttempts;
             try
             {
@@ -221,11 +223,12 @@ namespace ArtAPI
             ImagesToDownload.Clear();
         }
         /// <summary>
-        /// checks if there're already pictures saved locally and removes them from the list <see cref="ImagesToDownload"/>
+        /// checks if there are already pictures saved locally and removes them from the list <see cref="ImagesToDownload"/>
         /// </summary>
         private void CheckLocalImages()
         {
-            throw new NotImplementedException();
+            var localImages = Directory.GetFiles(ArtistDirSavepath).Select(Path.GetFileNameWithoutExtension).ToArray();
+            ImagesToDownload.RemoveAll(image => localImages.Contains($"{image.Name}_{image.ID}"));
         }
 
         public void CancelDownload()

@@ -75,7 +75,8 @@ namespace ArtAPI
                                                            .Replace("/videos/","/images/")
                                                            .Replace("/panos/", "/images/"),     // workaround to download 4k images, maybe there's a better way, I might change this later
                         Name = name,
-                        ID = image["id"].ToString()
+                        ID = image["id"].ToString(),
+                        FileType = image["image_url"].ToString().Split('?')[0].Split('/').Last().Split('.')[1]
                     });
                 }
             }
