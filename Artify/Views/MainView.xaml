@@ -4,10 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Artify"
+        xmlns:ap="clr-namespace:Artify.Views.misc"
         mc:Ignorable="d"
         Icon="../assets/icons/artify.png"
         Title="Artify" MinHeight="550" MinWidth="700" Height="660" Width="960" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown" Opacity="1" ResizeMode="CanResize"
-        Style="{StaticResource ArtifyWindow}" Name="MWindow">
+        Style="{StaticResource ArtifyWindowStyle}" Name="MWindow">
     <Window.DataContext>
         <local:ArtifyViewModel/>
     </Window.DataContext>
@@ -32,10 +33,10 @@
             <Label Content="Artify" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
                    Foreground="WhiteSmoke" FontSize="17" FontWeight="DemiBold"/>
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" FlowDirection="RightToLeft" WindowChrome.IsHitTestVisibleInChrome="True">
-                <Button x:Name="CloseButton" Style="{StaticResource WindowChromeButton}" Width="50" Command="{Binding ShutdownCommand}" CommandParameter="{Binding ElementName=MWindow }">
+                <Button x:Name="CloseButton" Style="{StaticResource WindowChromeButtonStyle}" Width="50" Command="{Binding ShutdownCommand}" CommandParameter="{Binding ElementName=MWindow }">
                     <Image Width="20" Source="../assets/icons/close.png"/>
                 </Button>
-                <Button x:Name="ResizeButton" Style="{StaticResource WindowChromeButton}" Width="50" Click="ResizeButton_Click" >
+                <Button x:Name="ResizeButton" Style="{StaticResource WindowChromeButtonStyle}" Width="50" Click="ResizeButton_Click" >
                     <Image Width="20" FlowDirection="LeftToRight">
                         <Image.Style>
                             <Style TargetType="{x:Type Image}">
@@ -51,7 +52,7 @@
                         </Image.Style>
                     </Image>
                 </Button>
-                <Button x:Name="MinimizeButton" Style="{StaticResource WindowChromeButton}" Width="50" Click="MinimizeButton_Click">
+                <Button x:Name="MinimizeButton" Style="{StaticResource WindowChromeButtonStyle}" Width="50" Click="MinimizeButton_Click">
                     <Image Width="28" Source="../assets/icons/minimize.png"/>
                 </Button>
             </StackPanel>
@@ -82,15 +83,33 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBox x:Name="UserInputField" Grid.RowSpan="2" MaxWidth="470" Style="{StaticResource InputField}" GotFocus="UserInput_GotFocus"
-                        Text="{Binding UserInput}" Tag="{Binding IsInputValid, Mode=TwoWay}"/>
+                <TextBox x:Name="UserInputField" Grid.RowSpan="2" MaxWidth="470"  GotFocus="UserInputField_GotFocus"
+                        Text="{Binding UserInput}" Tag="{Binding IsInputValid, Mode=TwoWay}" TextChanged="UserInputField_OnTextChanged">
+                    <!-- #region DataTriggers -->
+                    <TextBox.Style>
+                        <Style BasedOn="{StaticResource InputFieldStyle}" TargetType="{x:Type TextBox}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedPlatform}" Value="artstation">
+                                    <Setter Property="ap:AttachedProperties.Placeholder" Value="URL / Artist name"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding SelectedPlatform}" Value="deviantart">
+                                    <Setter Property="ap:AttachedProperties.Placeholder" Value="URL / Artist name"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding SelectedPlatform}" Value="pixiv">
+                                    <Setter Property="ap:AttachedProperties.Placeholder" Value="URL / Artist ID"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                    <!-- #endregion -->
+                </TextBox>
             </Grid>
             <Grid Grid.Row="2" Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Button x:Name="RunDownload" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="150" Style="{StaticResource MaterialButton}"
+                <Button x:Name="RunDownload" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="150" Style="{StaticResource MaterialButtonStyle}"
                         Command="{Binding RunDownloadCommand}" Content="{Binding RunDownloadButtonContent}" IsEnabled="{Binding RunDLButtonIsEnabled, Mode=OneWay}"/>
 
                 <ProgressBar Style="{StaticResource DLProgressBarStyle}" Grid.Row="1" Margin="45,28" MaxWidth="470" MaxHeight="30"/>
@@ -103,6 +122,7 @@
                 <TextBlock x:Name="Notification" Text="{Binding Notification}" Grid.Row="0" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="23" TextWrapping="Wrap" TextAlignment="Center"/>
             </Grid>
             <Image x:Name="SelectedPlatformIcon" Grid.Column="1" Grid.Row="0" Margin="25">
+                <!-- #region DataTriggers -->
                 <Image.Style>
                     <Style TargetType="{x:Type Image}">
                         <Style.Triggers>
@@ -118,8 +138,9 @@
                         </Style.Triggers>
                     </Style>
                 </Image.Style>
+                <!-- #endregion -->
             </Image>
-            <Button Grid.Column="2" Grid.Row="0" Style="{StaticResource SettingsButton}" Background="Transparent" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,-5,5,0" Click="SettingsClick" >
+            <Button Grid.Column="2" Grid.Row="0" Style="{StaticResource SettingsButtonStyle}" Background="Transparent" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,-5,5,0" Click="SettingsClick" >
                 <Image Width="25" Source="../assets/icons/settings.png"/>
             </Button>
         </Grid>
@@ -132,13 +153,13 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Tag="artstation" Click="SelectionMenuButton_Click" Style="{StaticResource SelectPlatformMenu}">
+                <Button Tag="artstation" Click="SelectionMenuButton_Click" Style="{StaticResource SelectPlatformMenuStyle}">
                     <Image Source="../assets/logos/artstation_logo.png"/>
                 </Button>
-                <Button Tag="deviantart" Click="SelectionMenuButton_Click" Style="{StaticResource SelectPlatformMenu}">
+                <Button Tag="deviantart" Click="SelectionMenuButton_Click" Style="{StaticResource SelectPlatformMenuStyle}">
                     <Image Source="../assets/logos/deviantart_logo.png"/>
                 </Button>
-                <Button Tag="pixiv" Click="SelectionMenuButton_Click" Style="{StaticResource SelectPlatformMenu}">
+                <Button Tag="pixiv" Click="SelectionMenuButton_Click" Style="{StaticResource SelectPlatformMenuStyle}">
                     <Image Source="../assets/logos/pixiv_logo.png"/>
                 </Button>
             </StackPanel>

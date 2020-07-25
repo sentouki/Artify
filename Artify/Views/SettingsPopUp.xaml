@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="SettingsPopUp" MinHeight="450" MinWidth="400" Height="450" Width="400" MaxHeight="700" MaxWidth="900" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Background="#141414" Opacity="0.99" Style="{StaticResource ArtifyPopUpWindow}">
+        Title="SettingsPopUp" MinHeight="450" MinWidth="400" Height="450" Width="400" MaxHeight="700" MaxWidth="900" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Background="#141414" Opacity="0.99" Style="{StaticResource ArtifyPopUpWindowStyle}">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="30"/>
     </WindowChrome.WindowChrome>
@@ -22,7 +22,7 @@
             <Label Content="Settings" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
                    Foreground="WhiteSmoke" FontSize="17" FontWeight="DemiBold"/>
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" FlowDirection="RightToLeft" WindowChrome.IsHitTestVisibleInChrome="True">
-                <Button x:Name="CloseButton" Style="{StaticResource WindowChromeButton}" Width="50" Click="CloseButton_Click" MinHeight="30">
+                <Button x:Name="CloseButton" Style="{StaticResource WindowChromeButtonStyle}" Width="50" Click="CloseButton_Click" MinHeight="30">
                     <Image Width="18" Source="../assets/icons/close.png"/>
                 </Button>
             </StackPanel>
@@ -33,7 +33,7 @@
                     <Label Content="Save Location" Foreground="white" FontSize="16"/>
                     <Grid>
                         <Label Name="path" Content="{Binding SaveLocation, Mode=TwoWay}" Foreground="White" VerticalAlignment="Center"/>
-                        <Button Style="{StaticResource MaterialButton }" HorizontalAlignment="Right" Margin="5" Content="Open" Height="40" Width="65" FontSize="14" Click="OpenClick" />
+                        <Button Style="{StaticResource MaterialButtonStyle }" HorizontalAlignment="Right" Margin="5" Content="Open" Height="40" Width="65" FontSize="14" Click="OpenClick" />
                     </Grid>
                     <StackPanel.Style>
                         <Style>
@@ -59,10 +59,10 @@
                 <StackPanel>
                     <Label Content="Pixiv Login" Foreground="white" FontSize="16"/>
                     <Label Content="Username" Foreground="white" FontSize="10" Margin="5,0,0,-10"/>
-                    <TextBox Name="username" Style="{StaticResource InputField}" Text="{Binding UserName}" Margin="10" Tag="{Binding IsLoginInputValid, Mode=TwoWay}" GotFocus="InputFieldGotFocus"/>
+                    <TextBox Name="username" Style="{StaticResource InputFieldStyle}" Text="{Binding UserName}" Margin="10" Tag="{Binding IsLoginInputValid, Mode=TwoWay}" GotFocus="InputFieldGotFocus"/>
                     <Label Content="Password" Foreground="white" FontSize="10" Margin="5,-10"/>
-                    <PasswordBox Name="password" Style="{StaticResource PasswordInputField}" Margin="10" Tag="{Binding IsLoginInputValid, Mode=TwoWay}" PasswordChanged="PasswordBox_PasswordChanged" GotFocus="InputFieldGotFocus"/>
-                    <Button Name="LoginButton" Style="{StaticResource MaterialButton}" Content="Login" Margin="80,15" FontSize="22" Command="{Binding LoginCommand}" Click="LoginButtonClick"/>
+                    <PasswordBox Name="password" Style="{StaticResource PasswordInputFieldStyle}" Margin="10" Tag="{Binding IsLoginInputValid, Mode=TwoWay}" PasswordChanged="PasswordBox_PasswordChanged" GotFocus="InputFieldGotFocus"/>
+                    <Button Name="LoginButton" Style="{StaticResource MaterialButtonStyle}" Content="Login" Margin="100,15" FontSize="20" Command="{Binding LoginCommand}" Click="LoginButtonClick"/>
                 </StackPanel>
             </Border>
         </StackPanel>

@@ -47,7 +47,7 @@ namespace Artify.Views
 
         private void LoginButtonClick(object sender, RoutedEventArgs e)
         {
-            if (username.Text.Length == 0 ||password.Password.Length == 0)
+            if (username.Text.Length == 0 || password.Password.Length == 0)
             {
                 if (username.Text.Length == 0) username.Tag = false;
                 if (password.Password.Length == 0) password.Tag = false;

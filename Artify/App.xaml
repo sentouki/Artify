@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              xmlns:local="clr-namespace:Artify"
+             xmlns:ap="clr-namespace:Artify.Views.misc"
              StartupUri="Views/MainView.xaml">
     <Application.Resources>
         <!--#region Storyboards -->
@@ -20,8 +21,8 @@
         </Storyboard>
         <!--#endregion-->
 
-        <!-- #region WindowChrome Buttons -->
-        <Style x:Key="WindowChromeButton" TargetType="{x:Type Button}">
+        <!-- #region WindowChrome Buttons Style -->
+        <Style x:Key="WindowChromeButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="#101010"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontFamily" Value="Segoe UI Light"/>
@@ -48,8 +49,8 @@
         </Style>
         <!--#endregion-->
 
-        <!-- #region SettingsButton -->
-        <Style x:Key="SettingsButton" BasedOn="{StaticResource WindowChromeButton}" TargetType="{x:Type Button}">
+        <!-- #region SettingsButton Style -->
+        <Style x:Key="SettingsButtonStyle" BasedOn="{StaticResource WindowChromeButtonStyle}" TargetType="{x:Type Button}">
             <Setter Property="RenderTransformOrigin" Value="0.5,0.49"/>
             <Setter Property="RenderTransform">
                 <Setter.Value>
@@ -75,7 +76,7 @@
         <!-- #endregion -->
 
         <!--#region MainWindow Style -->
-        <Style x:Key="ArtifyWindow" TargetType="Window">
+        <Style x:Key="ArtifyWindowStyle" TargetType="Window">
             <Setter Property="WindowStyle" Value="None"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="Background" Value="#171717"/>
@@ -93,7 +94,7 @@
         <!--#endregion-->
 
         <!--#region PopWindow Style-->
-        <Style x:Key="ArtifyPopUpWindow" BasedOn="{StaticResource ArtifyWindow}" TargetType="Window">
+        <Style x:Key="ArtifyPopUpWindowStyle" BasedOn="{StaticResource ArtifyWindowStyle}" TargetType="Window">
             <Style.Triggers>
                 <EventTrigger RoutedEvent="Window.Loaded">
                     <BeginStoryboard>
@@ -176,8 +177,8 @@
         </Style>
         <!--#endregion-->
 
-        <!--#region main button style -->
-        <Style x:Key="MaterialButton" TargetType="{x:Type Button}">
+        <!--#region main button Style -->
+        <Style x:Key="MaterialButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="FontSize" Value="28"/>
             <Setter Property="FontFamily" Value="Segoe UI Light"/>
             <Setter Property="Height" Value="auto"/>
@@ -242,8 +243,8 @@
         </Style>
         <!--#endregion-->
 
-        <!--#region selection menu style-->
-        <Style x:Key="SelectPlatformMenu" TargetType="{x:Type Button}">
+        <!--#region selection menu Style-->
+        <Style x:Key="SelectPlatformMenuStyle" TargetType="{x:Type Button}">
             <Setter Property="Command" Value="{Binding SelectPlatformCommand}"/>
             <Setter Property="CommandParameter" Value="{Binding Tag, RelativeSource={RelativeSource Self}}"/>
             <Setter Property="Width" Value="180"/>
@@ -298,13 +299,14 @@
         </Style>
         <!--#endregion-->
 
-        <!--#region input field style -->
-        <Style x:Key="InputField" TargetType="{x:Type TextBox}">
+        <!--#region input field Style -->
+        <Style x:Key="InputFieldStyle" TargetType="{x:Type TextBox}">
             <Setter Property="Background" Value="#111111"/>
             <Setter Property="Foreground" Value="White" />
             <Setter Property="FontSize" Value="23"/>
             <Setter Property="Height" Value="35"/>
             <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="ap:AttachedProperties.IsEmpty" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type TextBox}">
@@ -312,11 +314,34 @@
                             <Border Name="input_border" Background="{TemplateBinding Background}" BorderBrush="#252525" BorderThickness="1" CornerRadius="3" SnapsToDevicePixels="True">
                                 <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" VerticalContentAlignment="Center" Margin="1,1,0,0"/>
                             </Border>
+                            <TextBlock x:Name="Placeholder" Opacity=".2" Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(ap:AttachedProperties.Placeholder)}" Focusable="false" TextAlignment="Center" IsHitTestVisible="False"/>
                             <Border Name="input_border2" Background="Transparent" BorderBrush="#aaffa500" BorderThickness="1" CornerRadius="3" SnapsToDevicePixels="True" Opacity="0" IsHitTestVisible="False"/>
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="true">
                                 <Setter Property="BorderBrush" TargetName="input_border" Value="#333333"/>
+                            </Trigger>
+                            <Trigger Property="ap:AttachedProperties.IsEmpty" Value="False">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             Storyboard.TargetName="Placeholder"
+                                                             To="0"
+                                                             Duration="0:0:.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             Storyboard.TargetName="Placeholder"
+                                                             To=".2"
+                                                             Duration="0:0:.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                             </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="true">
                                 <Trigger.EnterActions>
@@ -376,7 +401,7 @@
         <!--#endregion-->
 
         <!--#region PasswordBox Style -->
-        <Style x:Key="PasswordInputField" TargetType="{x:Type PasswordBox}">
+        <Style x:Key="PasswordInputFieldStyle" TargetType="{x:Type PasswordBox}">
             <Setter Property="Background" Value="#111111"/>
             <Setter Property="Foreground" Value="White" />
             <Setter Property="FontSize" Value="23"/>
