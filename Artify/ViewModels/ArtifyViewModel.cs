@@ -141,7 +141,7 @@ namespace Artify
                         await artifyModel.Platform.GetImagesAsync(UserInput);
                         break;
                     case InputType.ArtistNameOrID:
-                        await artifyModel.Platform.GetImagesAsync(artifyModel.Platform.CreateUrlFromName(UserInput));
+                        await artifyModel.Platform.GetImagesAsync(await artifyModel.Platform.CreateUrlFromName(UserInput));
                         break;
                 }
             }

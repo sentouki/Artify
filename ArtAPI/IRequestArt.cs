@@ -37,7 +37,7 @@ namespace ArtAPI
         /// </summary>
         /// <param name="artistName">user name of an artist</param>
         /// <returns>URL with which an API request can be created</returns>
-        Uri CreateUrlFromName(string artistName);
+        Task<Uri> CreateUrlFromName(string artistName);
         void CancelDownload();
         Task<bool> CheckArtistExistsAsync(string artistName);
         Task<bool> auth(string refreshToken);
@@ -255,7 +255,7 @@ namespace ArtAPI
             await GetImagesAsync(new Uri(artistUrl)).ConfigureAwait(false);
         }
         public abstract Task GetImagesAsync(Uri artistUrl);
-        public abstract Uri CreateUrlFromName(string artistName);
+        public abstract Task<Uri> CreateUrlFromName(string artistName);
         public abstract Task<bool> CheckArtistExistsAsync(string artistName);
         protected abstract Task GetImagesMetadataAsync(string apiUrl);
         public virtual Task<bool> auth(string refreshToken) => Task.FromResult(true);

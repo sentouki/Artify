@@ -95,6 +95,10 @@ namespace Artify
         {
             if (Platform == null) return;
             settings.last_used_savepath = Platform.SavePath;
+            if (string.IsNullOrWhiteSpace(settings.pixiv_refresh_token))
+            {
+                settings.pixiv_refresh_token = null;
+            }
             var fi = new FileInfo(SettingsFilePath) { Attributes = FileAttributes.Normal };
             using (var sw = new StreamWriter(SettingsFilePath))
             {
@@ -153,7 +157,7 @@ namespace Artify
         public async Task<bool> Auth()
         {
             if (_selectedPlatform != "pixiv") return await Platform.auth(null);
-            if (settings.pixiv_refresh_token is { } token)
+            if (settings.pixiv_refresh_token is { } token && !string.IsNullOrWhiteSpace(token))
             {
                 return await Platform.auth(token);
             }

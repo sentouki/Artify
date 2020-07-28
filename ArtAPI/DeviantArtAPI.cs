@@ -19,9 +19,9 @@ namespace ArtAPI
 
         public bool IsLoggedIn { get; private set; }
 
-        public override Uri CreateUrlFromName(string artistName)
+        public override Task<Uri> CreateUrlFromName(string artistName)
         {
-            return new Uri($"https://www.deviantart.com/{artistName}");
+            return Task.FromResult(new Uri($"https://www.deviantart.com/{artistName}"));
         }
 
         public override async Task<bool> CheckArtistExistsAsync(string artistName)

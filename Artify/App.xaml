@@ -301,12 +301,12 @@
 
         <!--#region input field Style -->
         <Style x:Key="InputFieldStyle" TargetType="{x:Type TextBox}">
+            <EventSetter Event="TextChanged" Handler="InputField_OnTextChanged"/>
             <Setter Property="Background" Value="#111111"/>
             <Setter Property="Foreground" Value="White" />
             <Setter Property="FontSize" Value="23"/>
             <Setter Property="Height" Value="35"/>
             <Setter Property="Margin" Value="5,0"/>
-            <Setter Property="ap:AttachedProperties.IsEmpty" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type TextBox}">
@@ -414,7 +414,7 @@
                             <Border Name="input_border" Background="{TemplateBinding Background}" BorderBrush="#252525" BorderThickness="1" CornerRadius="3" SnapsToDevicePixels="True">
                                 <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" VerticalContentAlignment="Center" Margin="1,1,0,0"/>
                             </Border>
-                            <Border Name="input_border2" Background="Transparent" BorderBrush="#aaffa500" BorderThickness="1" CornerRadius="3" SnapsToDevicePixels="True" Opacity="0"/>
+                            <Border Name="input_border2" Background="Transparent" BorderBrush="#aaffa500" BorderThickness="1" CornerRadius="3" SnapsToDevicePixels="True" Opacity="0" IsHitTestVisible="False"/>
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="true">

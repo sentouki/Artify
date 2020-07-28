@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using ArtAPI;
 using Artify.ViewModels.misc;
 using Artify.Views;
-using Artify.Views.misc;
 
 namespace Artify
 {
@@ -122,11 +120,6 @@ namespace Artify
         {
             UserInputField.Tag = true;
             InputValidationLabel.Content = "";
-        }
-        private void UserInputField_OnTextChanged(object sender, TextChangedEventArgs e)
-        {
-            var inputfield = sender as TextBox;
-            AttachedProperties.SetIsEmpty(inputfield, string.IsNullOrEmpty(inputfield.Text));
         }
         private void HideSelectionMenuAnimation_Completed(object sender, EventArgs e)
         {

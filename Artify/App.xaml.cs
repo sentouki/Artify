@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Animation;
+using Artify.Views.misc;
 
 namespace Artify
 {
@@ -11,6 +13,12 @@ namespace Artify
         {
             (sender as Storyboard)?.Remove();
             GC.Collect();
+        }
+
+        private void InputField_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            var inputfield = sender as TextBox;
+            AttachedProperties.SetIsEmpty(inputfield, string.IsNullOrEmpty(inputfield.Text));
         }
     }
 }

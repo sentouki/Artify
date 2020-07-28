@@ -9,34 +9,32 @@ namespace ArtAPI
 {
     public sealed class PixivAPI : RequestArt
     {
-        const string AUTH_URL = @"https://oauth.secure.pixiv.net/auth/token";
-        const string LOGIN_SECRET = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
-        private const string APIUrlWithLogin = @"https://app-api.pixiv.net/v1/user/illusts?user_id={0}";
-        private const string APIUrlWithoutLogin = @"https://www.pixiv.net/touch/ajax/illust/user_illusts?user_id={0}";  // &offset= einbauen
+        private const string 
+            AUTH_URL = @"https://oauth.secure.pixiv.net/auth/token",
+            LOGIN_SECRET = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c",
+            APIUrlWithLogin = @"https://app-api.pixiv.net/v1/user/illusts?user_id={0}",
+            APIUrlWithoutLogin = @"https://www.pixiv.net/touch/ajax/illust/user_illusts?user_id={0}",
+            UserSearchUrl = @"https://app-api.pixiv.net/v1/search/user?word={0}",
+            IllustProjectUrl = @"https://www.pixiv.net/touch/ajax/illust/details?illust_id={0}", // one project can contain multiple illustrations
+            ArtistDetails = @"https://www.pixiv.net/touch/ajax/user/details?id={0}";
 
-        /// <summary>
-        /// one project can contain multiple illustrations
-        /// </summary>
-        private const string IllustProjectUrl = @"https://www.pixiv.net/touch/ajax/illust/details?illust_id={0}";
-
-        private const string ArtistDetails = @"https://www.pixiv.net/touch/ajax/user/details?id={0}";
-
+        private string _artistName;
         public bool IsLoggedIn { get; private set; }
 
         public string RefreshToken { get; private set; }
+
         public PixivAPI()
         {
             Client.DefaultRequestHeaders.Referrer = new Uri("https://www.pixiv.net");
         }
 
-        public override Uri CreateUrlFromName(string username)
+        public override async Task<Uri> CreateUrlFromName(string artistName)
         {
-            if (int.TryParse(username, out _))
-            {
-                return CreateUrlFromID(username);
-            }
-            // NOTE: implement search for artist
-            return null;
+            // input may be an ID or a name, so we check first if it's an ID
+            if (int.TryParse(artistName, out _))
+                return CreateUrlFromID(artistName);
+            _artistName = artistName;           // this will be needed later to create a directory, so we don't need to look up the name twice
+            return CreateUrlFromID(await GetArtistID(artistName));
         }
 
         public Uri CreateUrlFromID(string userid)
@@ -44,11 +42,24 @@ namespace ArtAPI
             return new Uri($@"https://www.pixiv.net/en/users/{userid}");
         }
 
-        public override async Task<bool> CheckArtistExistsAsync(string artistID)
+        public override async Task<bool> CheckArtistExistsAsync(string artist)
         {
-            var response = await Client.GetAsync(string.Format(ArtistDetails, artistID))
+            if (!int.TryParse(artist, out _))
+            {
+                artist = await GetArtistID(artist);
+            }
+            var response = await Client.GetAsync(string.Format(ArtistDetails, artist))
                  .ConfigureAwait(false);
             return response.IsSuccessStatusCode;
+        }
+        private async Task<string> GetArtistID(string artistName)
+        {
+            if (!IsLoggedIn) return null;
+            var response = await Client.GetStringAsync(string.Format(UserSearchUrl, artistName)).ConfigureAwait(false);
+            var searchResults = JObject.Parse(response);
+            if (!searchResults["user_previews"].HasValues) return null;
+            var artistID = searchResults["user_previews"][0]["user"]["id"].ToString();
+            return artistID;
         }
         private async Task<string> GetArtistName(string artistID)
         {
@@ -61,7 +72,13 @@ namespace ArtAPI
             OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadPreparing));
             var artistID = artistUrl?.AbsolutePath.Split('/')[3];
             if (artistID == null) return;
-            CreateSaveDir(await GetArtistName(artistID).ConfigureAwait(false));
+            if (_artistName is {})
+            {
+                CreateSaveDir(_artistName);
+                _artistName = null;
+            }
+            else
+                CreateSaveDir(await GetArtistName(artistID).ConfigureAwait(false));
             if (IsLoggedIn)
             {
                 await GetImagesMetadataAsync(string.Format(APIUrlWithLogin, artistID)).ConfigureAwait(false);
@@ -197,6 +214,11 @@ namespace ArtAPI
                 {"grant_type", "refresh_token" },
                 {"refresh_token", refreshToken },
             };
+            if (Client.DefaultRequestHeaders.Contains("X-Client-Time"))
+            {
+                Client.DefaultRequestHeaders.Remove("X-Client-Time");
+                Client.DefaultRequestHeaders.Remove("X-Client-Hash");
+            }
             Client.DefaultRequestHeaders.Add("X-Client-Time", clientTime);
             Client.DefaultRequestHeaders.Add("X-Client-Hash", General.CreateMD5(clientTime + LOGIN_SECRET));
             using var content = new FormUrlEncodedContent(data);
@@ -234,6 +256,11 @@ namespace ArtAPI
                 {"username", username },
                 {"password", password }
             };
+            if (Client.DefaultRequestHeaders.Contains("X-Client-Time"))
+            {
+                Client.DefaultRequestHeaders.Remove("X-Client-Time");
+                Client.DefaultRequestHeaders.Remove("X-Client-Hash");
+            }
             Client.DefaultRequestHeaders.Add("X-Client-Time", clientTime);
             Client.DefaultRequestHeaders.Add("X-Client-Hash", General.CreateMD5(clientTime + LOGIN_SECRET));
             using var content = new FormUrlEncodedContent(data);

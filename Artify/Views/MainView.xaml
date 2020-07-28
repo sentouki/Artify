@@ -84,7 +84,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <TextBox x:Name="UserInputField" Grid.RowSpan="2" MaxWidth="470"  GotFocus="UserInputField_GotFocus"
-                        Text="{Binding UserInput}" Tag="{Binding IsInputValid, Mode=TwoWay}" TextChanged="UserInputField_OnTextChanged">
+                        Text="{Binding UserInput}" Tag="{Binding IsInputValid, Mode=TwoWay}">
                     <!-- #region DataTriggers -->
                     <TextBox.Style>
                         <Style BasedOn="{StaticResource InputFieldStyle}" TargetType="{x:Type TextBox}">

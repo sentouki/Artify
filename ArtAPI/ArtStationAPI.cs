@@ -10,13 +10,13 @@ namespace ArtAPI
         private const string ApiUrl = @"https://artstation.com/users/{0}/projects?page=";
         private const string AssetsUrl = @"https://www.artstation.com/projects/{0}.json";
 
-        public override Uri CreateUrlFromName(string artistName)
+        public override Task<Uri> CreateUrlFromName(string artistName)
         {
-            return new Uri(string.Format($@"https://www.artstation.com/{artistName}"));
+            return Task.FromResult(new Uri(string.Format($@"https://www.artstation.com/{artistName}")));
         }
         public override async Task<bool> CheckArtistExistsAsync(string artistName)
         {
-            var response = await Client.GetAsync(CreateUrlFromName(artistName));
+            var response = await Client.GetAsync(await CreateUrlFromName(artistName));
             return response.IsSuccessStatusCode;
         }
 

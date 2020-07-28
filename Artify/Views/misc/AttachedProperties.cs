@@ -9,7 +9,7 @@ namespace Artify.Views.misc
                                                                                                     typeof(AttachedProperties));
         public static readonly DependencyProperty IsEmptyProperty = DependencyProperty.RegisterAttached("IsEmpty",
                                                                                                         typeof(bool),
-                                                                                                        typeof(AttachedProperties), new PropertyMetadata(false));
+                                                                                                        typeof(AttachedProperties), new PropertyMetadata(true));
 
         public static string GetPlaceholder(UIElement element)
             => element?.GetValue(PlaceholderProperty) as string;
