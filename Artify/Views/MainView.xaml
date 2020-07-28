@@ -96,7 +96,7 @@
                                     <Setter Property="ap:AttachedProperties.Placeholder" Value="URL / Artist name"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding SelectedPlatform}" Value="pixiv">
-                                    <Setter Property="ap:AttachedProperties.Placeholder" Value="URL / Artist ID"/>
+                                    <Setter Property="ap:AttachedProperties.Placeholder" Value="URL / Artist name / Artist ID"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
