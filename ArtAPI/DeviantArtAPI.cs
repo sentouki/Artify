@@ -13,7 +13,8 @@ namespace ArtAPI
             ClientID = "12774",
             ClientSecret = "597114f315705b9624c7c1d74ad729e1",
             AUTH_URL = "https://www.deviantart.com/oauth2/token",
-            GALLERY_URL = "https://www.deviantart.com/api/v1/oauth2/gallery/all?mature_content=true&limit=20&username={0}&offset=";
+            GALLERY_URL = "https://www.deviantart.com/api/v1/oauth2/gallery/all?mature_content=true&limit=20&username={0}&offset=",
+            ORIGINIMAGE_URL = "https://www.deviantart.com/api/v1/oauth2/deviation/download/{0}?mature_content=true";
 
         private const int Offset = 20;
 
@@ -54,19 +55,39 @@ namespace ArtAPI
                 var responseJson = JObject.Parse(rawResponse);
                 var Gallery = (JContainer)responseJson["results"];
                 if (!(Gallery.HasValues)) return;     // check if the user has any images in his gallery
-                foreach (var image in Gallery)
+                var tasks = Gallery.Select(async (image) =>
                 {
-                    if (image["content"] == null) continue;
+                    if (image["content"] == null) return;
+                    var deviationID = image["deviationid"].ToString();
                     ImagesToDownload.Add(new ImageModel()
                     {
-                        Url = image["content"]["src"].ToString(),
+                        Url = (await GetOriginImage(deviationID) is { } url) ? url : image["content"]["src"].ToString(), // try to get the origin image, use the scaled down image if fails
                         Name = image["title"].ToString(),
-                        ID = image["deviationid"].ToString(),
-                        FileType = image["content"]["src"].ToString().Split('?')[0].Split('/').Last().Split('.')[1]  // maybe not the best way but surely the the easiest one
+                        ID = deviationID,
+                        FileType = image["content"]["src"].ToString().Split('?')[0].Split('/').Last()
+                                                                     .Split('.')[1] // maybe not the best way but surely the the easiest one
                     });
-                }
+                });
+                await Task.WhenAll(tasks);
                 if (responseJson["has_more"].ToString() == "False") return;
                 paginationOffset += Offset;
+            }
+        }
+        /// <summary>
+        /// get the Url to the origin image, not the scaled down one
+        /// </summary>
+        private async Task<string> GetOriginImage(string deviationID)
+        {
+            try
+            {
+                var rawResponse = await Client.GetStringAsync(string.Format(ORIGINIMAGE_URL, deviationID))
+                                                    .ConfigureAwait(false);
+                var responseJson = JObject.Parse(rawResponse);
+                return responseJson["src"].ToString();
+            }
+            catch (HttpRequestException)
+            {
+                return null;
             }
         }
 
@@ -89,7 +110,7 @@ namespace ArtAPI
                     Client.DefaultRequestHeaders.Remove("Authorization");
                 Client.DefaultRequestHeaders.Add("Authorization", $"Bearer {jsonResponse["access_token"]}");
             }
-            catch(HttpRequestException)
+            catch (HttpRequestException)
             {
                 return false;
             }

@@ -72,8 +72,14 @@ namespace Artify
                 HideSelectionMenu();
             }
         }
+        private void SelectedPlatformIcon_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            ShowSelectionMenu();
+        }
+
         private void WindowChromeOnMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.ChangedButton != MouseButton.Left) return;
             ResizeMode = ResizeMode.NoResize;
             DragMove();
         }
@@ -121,6 +127,7 @@ namespace Artify
             UserInputField.Tag = true;
             InputValidationLabel.Content = "";
         }
+
         private void HideSelectionMenuAnimation_Completed(object sender, EventArgs e)
         {
             SelectionMenu.Visibility = Visibility.Hidden;

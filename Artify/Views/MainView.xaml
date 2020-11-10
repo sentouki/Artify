@@ -121,7 +121,7 @@
                 </Grid.RowDefinitions>
                 <TextBlock x:Name="Notification" Text="{Binding Notification}" Grid.Row="0" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="23" TextWrapping="Wrap" TextAlignment="Center"/>
             </Grid>
-            <Image x:Name="SelectedPlatformIcon" Grid.Column="1" Grid.Row="0" Margin="25">
+            <Image x:Name="SelectedPlatformIcon" Grid.Column="1" Grid.Row="0" Margin="25" MouseLeftButtonDown="SelectedPlatformIcon_MouseLeftButtonDown">
                 <!-- #region DataTriggers -->
                 <Image.Style>
                     <Style TargetType="{x:Type Image}">
