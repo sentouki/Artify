@@ -90,6 +90,9 @@ namespace Artify
                         Notification += $"\n{e.FailedDownloads} images couldn't be downloaded";
                     break;
                 case State.ExceptionRaised:
+#if DEBUG
+                    Debug.WriteLine($"ERR_MSG: {e.ExceptionMsg}");
+#endif
                     break;
             }
         }

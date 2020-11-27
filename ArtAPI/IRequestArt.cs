@@ -184,9 +184,16 @@ namespace ArtAPI
                     try
                     {
                         using (var asyncResponse = await Client.GetAsync(image.Url, cts.Token).ConfigureAwait(false))
-                        await using (var fstream = new FileStream(imageSavePath, FileMode.Create))
                         {
-                            await (await asyncResponse.Content.ReadAsStreamAsync()).CopyToAsync(fstream).ConfigureAwait(false);
+                            if (asyncResponse.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                // TODO: fix this later; handle this error somehow, like try to auth again
+                                i = 1;
+                                throw new Exception("API token expired");
+                            }
+                            await using var fstream = new FileStream(imageSavePath, FileMode.Create);
+                            await (await asyncResponse.Content.ReadAsStreamAsync()).CopyToAsync(fstream)
+                                .ConfigureAwait(false);
                         }
                         Progress++;
                         return;
@@ -195,7 +202,7 @@ namespace ArtAPI
                     {
                         if (i == 1 || cts.IsCancellationRequested) throw;
                         // if there's a some timeout or connection error, wait random amount of time before trying again
-                        await Task.Delay(new Random().Next(500, 2000)).ConfigureAwait(false);
+                        await Task.Delay(new Random().Next(500, 3000)).ConfigureAwait(false);
                     }
                 }
             }

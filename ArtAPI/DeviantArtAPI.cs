@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -19,6 +20,8 @@ namespace ArtAPI
         private const int Offset = 20;
 
         public bool IsLoggedIn { get; private set; }
+
+        private readonly Regex _scaledDownImgUrlPattern = new Regex(@"(w_[0-9]{3,4}),(h_[0-9]{3,4}),(q_[0-9]{2})", RegexOptions.Compiled);
 
         public override Task<Uri> CreateUrlFromName(string artistName)
         {
@@ -49,6 +52,7 @@ namespace ArtAPI
         protected override async Task GetImagesMetadataAsync(string apiUrl)
         {
             var paginationOffset = 0;
+
             while (true)
             {
                 var rawResponse = await Client.GetStringAsync(apiUrl + paginationOffset).ConfigureAwait(false);
@@ -59,14 +63,23 @@ namespace ArtAPI
                 {
                     if (image["content"] == null) return;
                     var deviationID = image["deviationid"].ToString();
-                    ImagesToDownload.Add(new ImageModel()
+                    var url = image["content"]["src"].ToString();
+                    if (_scaledDownImgUrlPattern.IsMatch(url))                     // Check if it's a URL to a scaled down image in order to avoid unnecessary api calls (too many calls may result in a 'Error 401 API token expired') 
                     {
-                        Url = (await GetOriginImage(deviationID) is { } url) ? url : image["content"]["src"].ToString(), // try to get the origin image, use the scaled down image if fails
-                        Name = image["title"].ToString(),
-                        ID = deviationID,
-                        FileType = image["content"]["src"].ToString().Split('?')[0].Split('/').Last()
-                                                                     .Split('.')[1] // maybe not the best way but surely the the easiest one
-                    });
+                        if (await GetOriginImage(deviationID) is { } _url)   // try to get the origin image, use the scaled down image if fails
+                            url = _url;
+                    }
+                    lock (ImagesToDownload)
+                    {
+                        ImagesToDownload.Add(new ImageModel()
+                        {
+                            Url = url,
+                            Name = image["title"].ToString(),
+                            ID = deviationID,
+                            FileType = image["content"]["src"].ToString().Split('?')[0].Split('/').Last()
+                                .Split('.')[1] // maybe not the best way but surely the the easiest one
+                        });
+                    }
                 });
                 await Task.WhenAll(tasks);
                 if (responseJson["has_more"].ToString() == "False") return;
@@ -93,7 +106,6 @@ namespace ArtAPI
 
         public override async Task<bool> auth(string refreshToken)
         {
-            if (IsLoggedIn) return true;
             var data = new Dictionary<string, string>()
             {
                 {"grant_type", "client_credentials" },

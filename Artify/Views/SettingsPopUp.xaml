@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="SettingsPopUp" MinHeight="450" MinWidth="400" Height="450" Width="400" MaxHeight="700" MaxWidth="900" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Background="#141414" Opacity="0.99" Style="{StaticResource ArtifyPopUpWindowStyle}">
+        Title="SettingsPopUp" MinHeight="450" MinWidth="400" Height="450" Width="400" MaxHeight="700" MaxWidth="900" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Background="#141414" Opacity="0.99" Style="{StaticResource ArtifyPopUpWindowStyle}" KeyDown="Window_KeyDown">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="30"/>
     </WindowChrome.WindowChrome>

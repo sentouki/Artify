@@ -9,7 +9,7 @@ namespace ArtAPI
 {
     public sealed class PixivAPI : RequestArt
     {
-        private const string 
+        private const string
             AUTH_URL = @"https://oauth.secure.pixiv.net/auth/token",
             LOGIN_SECRET = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c",
             APIUrlWithLogin = @"https://app-api.pixiv.net/v1/user/illusts?user_id={0}",
@@ -72,7 +72,7 @@ namespace ArtAPI
             OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadPreparing));
             var artistID = artistUrl?.AbsolutePath.Split('/')[3];
             if (artistID == null) return;
-            if (_artistName is {})
+            if (_artistName is { })
             {
                 CreateSaveDir(_artistName);
                 _artistName = null;

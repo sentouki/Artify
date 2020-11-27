@@ -60,5 +60,10 @@ namespace Artify.Views
         {
             username.Tag = password.Tag = LoginButton.IsEnabled = true;
         }
+
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Escape) Close();
+        }
     }
 }
