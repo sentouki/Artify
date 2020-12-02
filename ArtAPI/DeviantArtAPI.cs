@@ -19,8 +19,6 @@ namespace ArtAPI
 
         private const int Offset = 20;
 
-        public bool IsLoggedIn { get; private set; }
-
         private readonly Regex _scaledDownImgUrlPattern = new Regex(@"(w_[0-9]{3,4}),(h_[0-9]{3,4}),(q_[0-9]{2})", RegexOptions.Compiled);
 
         public override Task<Uri> CreateUrlFromName(string artistName)
@@ -104,8 +102,9 @@ namespace ArtAPI
             }
         }
 
-        public override async Task<bool> auth(string refreshToken)
+        public override async Task<bool> Auth(string refreshToken)
         {
+            OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.Authenticating));
             var data = new Dictionary<string, string>()
             {
                 {"grant_type", "client_credentials" },
@@ -124,8 +123,10 @@ namespace ArtAPI
             }
             catch (HttpRequestException)
             {
+                OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.Failed));
                 return false;
             }
+            OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.LoggedIn));
             return IsLoggedIn = true;
         }
     }

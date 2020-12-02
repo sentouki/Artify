@@ -19,7 +19,6 @@ namespace ArtAPI
             ArtistDetails = @"https://www.pixiv.net/touch/ajax/user/details?id={0}";
 
         private string _artistName;
-        public bool IsLoggedIn { get; private set; }
 
         public string RefreshToken { get; private set; }
 
@@ -202,9 +201,10 @@ namespace ArtAPI
             }
         }
 
-        public override async Task<bool> auth(string refreshToken)
+        public override async Task<bool> Auth(string refreshToken)
         {
             if (IsLoggedIn) return true;
+            OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.Authenticating));
             var clientTime = DateTime.UtcNow.ToString("s") + "+00:00";
             var data = new Dictionary<string, string>()
             {
@@ -228,6 +228,7 @@ namespace ArtAPI
                 var jsonResponse = JObject.Parse(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
                 if (jsonResponse.ContainsKey("has_error"))
                 {
+                    OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.Failed));
                     return false;
                 }
                 var accessToken = jsonResponse["response"]["access_token"]?.ToString() ??
@@ -239,13 +240,16 @@ namespace ArtAPI
             }
             catch (HttpRequestException)
             {
+                OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.Failed));
                 return false;
             }
+            OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.LoggedIn));
             return IsLoggedIn = true;
         }
 
-        public override async Task<string> login(string username, string password)
+        public override async Task<string> Login(string username, string password)
         {
+            OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.LoggingIn));
             var clientTime = DateTime.UtcNow.ToString("s") + "+00:00";
             var data = new Dictionary<string, string>()
             {
@@ -270,6 +274,7 @@ namespace ArtAPI
                 var jsonResponse = JObject.Parse(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
                 if (jsonResponse.ContainsKey("has_error"))
                 {
+                    OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.Failed));
                     return null;
                 }
                 var accessToken = jsonResponse["response"]["access_token"]?.ToString() ??
@@ -281,9 +286,11 @@ namespace ArtAPI
             }
             catch (HttpRequestException)
             {
+                OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.Failed));
                 return null;
             }
             IsLoggedIn = true;
+            OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.LoggedIn));
             return RefreshToken;
         }
     }

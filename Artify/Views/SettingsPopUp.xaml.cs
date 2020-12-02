@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Microsoft.Win32;
 
 namespace Artify.Views
 {
     public partial class SettingsPopUp : Window
     {
-        public SettingsPopUp(Window owner)
+        public SettingsPopUp()
         {
             InitializeComponent();
-            DataContext = owner.DataContext;
-            Owner = owner;
             Opacity = 0;
         }
 
@@ -47,23 +46,37 @@ namespace Artify.Views
 
         private void LoginButtonClick(object sender, RoutedEventArgs e)
         {
-            if (username.Text.Length == 0 || password.Password.Length == 0)
-            {
-                if (username.Text.Length == 0) username.Tag = false;
-                if (password.Password.Length == 0) password.Tag = false;
-                return;
-            }
-            LoginButton.IsEnabled = false;
+            if (username.Text.Length == 0) username.Tag = false;
+            if (password.Password.Length == 0) password.Tag = false;
         }
 
         private void InputFieldGotFocus(object sender, RoutedEventArgs e)
         {
-            username.Tag = password.Tag = LoginButton.IsEnabled = true;
+            username.Tag = password.Tag = true;
         }
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Escape) Close();
+        }
+
+        private void TextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            // make sure that input contains only numbers
+            if (!int.TryParse(e.Text, out _) || string.IsNullOrWhiteSpace(e.Text))
+                e.Handled = true;
+        }
+
+        private void TextBox_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            // make sure that input doesn't contain any whitespace
+            switch (e.Key)
+            {
+                case Key.Space:
+                case Key.V when (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control:
+                    e.Handled = true;
+                    break;
+            }
         }
     }
 }

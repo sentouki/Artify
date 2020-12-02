@@ -1,17 +1,13 @@
-﻿<Window x:Class="Artify.MainWindow"
+﻿<Window x:Class="Artify.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Artify"
         xmlns:ap="clr-namespace:Artify.Views.misc"
         mc:Ignorable="d"
         Icon="../assets/icons/artify.png"
         Title="Artify" MinHeight="550" MinWidth="700" Height="660" Width="960" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown" Opacity="1" ResizeMode="CanResize"
         Style="{StaticResource ArtifyWindowStyle}" Name="MWindow">
-    <Window.DataContext>
-        <local:ArtifyViewModel/>
-    </Window.DataContext>
     <Window.Resources>
     </Window.Resources>
     <WindowChrome.WindowChrome>

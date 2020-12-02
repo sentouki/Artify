@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace Artify
+namespace Artify.ViewModels
 {
     public class RelayCommand : ICommand
     {

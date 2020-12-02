@@ -1,24 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 #pragma warning disable CA5351
 
 namespace ArtAPI
 {
-    public enum State
-    {
-        DownloadPreparing,
-        DownloadRunning,
-        DownloadCompleted,
-        DownloadCanceled,
-        ExceptionRaised,
-    }
-
     public static class General
     {
+        /// <summary>
+        /// for hashing strings, used for Pixiv API authentication 
+        /// </summary>
+        /// <returns>hashed string</returns>
         public static string CreateMD5(string input)
         {
-            // Use input string to calculate MD5 hash
             using (MD5 md5 = MD5.Create())
             {
                 byte[] inputBytes = Encoding.ASCII.GetBytes(input);
@@ -33,6 +28,36 @@ namespace ArtAPI
                 return sb.ToString();
             }
         }
+        /// <summary>
+        /// special characters which cannot be used for file and directory names
+        /// </summary>
+        private static readonly List<string> SpecialChars = new List<string>() { @"\", "/", ":", "*", "?", "\"", "<", ">", "|" };
+        /// <summary>
+        /// remove all the nasty characters that can cause trouble
+        /// </summary>
+        /// <returns>normalized file name</returns>
+        public static string NormalizeFileName(string filename)
+        {
+            SpecialChars.ForEach(c => filename = filename.Replace(c, ""));
+            return filename;
+        }
+
+    }
+    public enum State
+    {
+        DownloadPreparing,
+        DownloadRunning,
+        DownloadCompleted,
+        DownloadCanceled,
+        ExceptionRaised,
+    }
+    public enum LoginStatus
+    {
+        NotLoggedIn,
+        LoggingIn,
+        Authenticating,
+        LoggedIn,
+        Failed
     }
 
     #region defining EventArgs
@@ -63,6 +88,16 @@ namespace ArtAPI
         public DownloadProgressChangedEventArgs(int progress)
         {
             CurrentProgress = progress;
+        }
+    }
+
+    public class LoginStatusChangedEventArgs : EventArgs
+    {
+        public LoginStatus Status { get; }
+
+        public LoginStatusChangedEventArgs(LoginStatus status)
+        {
+            Status = status;
         }
     }
     #endregion

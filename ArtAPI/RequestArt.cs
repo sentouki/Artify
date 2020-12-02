@@ -9,86 +9,60 @@ using System.Threading.Tasks;
 
 namespace ArtAPI
 {
-    public interface IRequestArt
+    public abstract class RequestArt
     {
-        #region Events
-        /// <summary>
-        /// notify the GUI/CLI about states current state
-        /// </summary>
-        event EventHandler<DownloadStateChangedEventArgs> DownloadStateChanged;
-        /// <summary>
-        /// notify the GUI/CLI about download progress
-        /// </summary>
-        event EventHandler<DownloadProgressChangedEventArgs> DownloadProgressChanged;
-        #endregion
-        string SavePath { get; set; }
-        /// <summary>
-        /// public method which will be used to download images
-        /// </summary>
-        /// <param name="artistUrl">artist profile url</param>
-        Task GetImagesAsync(string artistUrl);
-        /// <summary>
-        /// public method which will be used to download images
-        /// </summary>
-        /// <param name="artistUrl">Uri object with artist profile url</param>
-        Task GetImagesAsync(Uri artistUrl);
-        /// <summary>
-        /// creates API-URL from given username
-        /// </summary>
-        /// <param name="artistName">user name of an artist</param>
-        /// <returns>URL with which an API request can be created</returns>
-        Task<Uri> CreateUrlFromName(string artistName);
-        void CancelDownload();
-        Task<bool> CheckArtistExistsAsync(string artistName);
-        Task<bool> auth(string refreshToken);
-        Task<string> login(string username, string password);
-    }
-
-    public abstract class RequestArt : IRequestArt
-    {
-        private const int
-            ClientTimeout = 20,
-            NumberOfDLAttempts = 10,
-            ConcurrentTasks = 15;
-        private string ArtistDirSavepath;
+        #region private fields
+        private int
+            _clientTimeout = 20,
+            _downloadAttempts = 10,
+            _concurrentTasks = 15;
+        private string _artistDirSavepath;
         private int _progress;
-        public State? CurrentState { get; protected set; }
-        protected HttpClient Client { get; }
-        protected HttpClientHandler handler { get; }
         private CancellationTokenSource cts;
+        #endregion
+        #region protected fields
+        protected HttpClient Client { get; }
+        protected HttpClientHandler Handler { get; }
         protected virtual string Header { get; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36";
         protected List<ImageModel> ImagesToDownload { get; } = new List<ImageModel>();
-
-        #region ctor & dtor
-        protected RequestArt()
-        {
-            handler = new HttpClientHandler()
-            {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-            };
-            Client = new HttpClient(handler);
-            Client.DefaultRequestHeaders.Add("User-Agent", Header);
-            Client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
-            Client.Timeout = new TimeSpan(0, 0, ClientTimeout);
-        }
-        ~RequestArt()
-        {
-
-            Client?.Dispose();
-            handler?.Dispose();
-        }
         #endregion
-        #region properties
+
+        #region public properties
+
+        public int ClientTimeout
+        {
+            get => _clientTimeout;
+            set
+            {
+                _clientTimeout = value > 0 ? value : 1;
+                Client.Timeout = new TimeSpan(0, 0, _clientTimeout);
+            }
+        }
+        public int DownloadAttempts
+        {
+            get => _downloadAttempts;
+            set => _downloadAttempts = value > 0 ? value : 1;
+        }
+        public int ConcurrentTasks
+        {
+            get => _concurrentTasks;
+            set => _concurrentTasks = value > 0 ? value : 1;
+        }
+        public State CurrentState { get; protected set; }
+        public LoginStatus LoginState { get; protected set; }
         /// <summary>
         /// path to where the images should be saved
         /// </summary>
         public string SavePath { get; set; }
+
+        public bool IsLoggedIn { get; protected set; }
         /// <summary>
         /// safely increment the progress and notify about the change
         /// </summary>
         public virtual int Progress
         {
             get => _progress;
+            // ReSharper disable once ValueParameterNotUsed
             protected set
             {
                 Interlocked.Increment(ref _progress);
@@ -103,9 +77,30 @@ namespace ArtAPI
         public int FailedDownloads => TotalImageCount - Progress;
 
         #endregion
+
+        #region ctor & dtor
+        protected RequestArt()
+        {
+            Handler = new HttpClientHandler()
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+            Client = new HttpClient(Handler);
+            Client.DefaultRequestHeaders.Add("User-Agent", Header);
+            Client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
+            Client.Timeout = new TimeSpan(0, 0, _clientTimeout);
+        }
+        ~RequestArt()
+        {
+
+            Client?.Dispose();
+            Handler?.Dispose();
+        }
+        #endregion
         #region Event handler
         public event EventHandler<DownloadStateChangedEventArgs> DownloadStateChanged;
         public event EventHandler<DownloadProgressChangedEventArgs> DownloadProgressChanged;
+        public event EventHandler<LoginStatusChangedEventArgs> LoginStatusChanged; 
         protected void OnDownloadProgressChanged(DownloadProgressChangedEventArgs e)
         {
             DownloadProgressChanged?.Invoke(this, e);
@@ -117,6 +112,11 @@ namespace ArtAPI
             {
                 CurrentState = e.state;
             }
+        }
+        protected void OnLoginStatusChanged(LoginStatusChangedEventArgs e)
+        {
+            LoginStatusChanged?.Invoke(this, e);
+            LoginState = e.Status;
         }
         #endregion
 
@@ -135,20 +135,15 @@ namespace ArtAPI
             CheckLocalImages();
             OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadRunning, TotalImageCount: TotalImageCount));
             cts = new CancellationTokenSource();
-            using var ss = new SemaphoreSlim(ConcurrentTasks);
-            var tasks = new List<Task>();
-            foreach (var image in ImagesToDownload)
+            var ss = new SemaphoreSlim(_concurrentTasks);
+            var t = Task.WhenAll(ImagesToDownload.Select(image => Task.Run(async () =>
             {
+                // ReSharper disable once AccessToDisposedClosure
                 await ss.WaitAsync();
-                tasks.Add(
-                    Task.Run(async () =>
-                        {
-                            await DownloadAsync(image, ArtistDirSavepath).ConfigureAwait(false);
-                            ss.Release();
-                        })
-                );
-            }
-            var t = Task.WhenAll(tasks.ToArray());
+                await DownloadAsync(image, _artistDirSavepath).ConfigureAwait(false);
+                // ReSharper disable once AccessToDisposedClosure
+                ss.Release();
+            })).ToArray());
             try
             {
                 await t.ConfigureAwait(false);
@@ -163,6 +158,7 @@ namespace ArtAPI
                 OnDownloadStateChanged(!cts.IsCancellationRequested
                     ? new DownloadStateChangedEventArgs(State.DownloadCompleted, FailedDownloads: FailedDownloads)
                     : new DownloadStateChangedEventArgs(State.DownloadCanceled, FailedDownloads: FailedDownloads));
+                ss.Dispose();
                 Clear();
             }
         }
@@ -174,41 +170,45 @@ namespace ArtAPI
         protected async Task DownloadAsync(ImageModel image, string savePath)
         {
             if (image == null) return;
-            var imageName = NormalizeFileName(image.Name);
+            var imageName = General.NormalizeFileName(image.Name);
             var imageSavePath = Path.Combine(savePath, $"{imageName}_{image.ID}.{image.FileType}");
-            const int tries = NumberOfDLAttempts;
             try
             {
-                for (var i = tries; i > 0; i--)
-                {   // if download fails, try to download again
-                    try
-                    {
-                        using (var asyncResponse = await Client.GetAsync(image.Url, cts.Token).ConfigureAwait(false))
-                        {
-                            if (asyncResponse.StatusCode == HttpStatusCode.Unauthorized)
-                            {
-                                // TODO: fix this later; handle this error somehow, like try to auth again
-                                i = 1;
-                                throw new Exception("API token expired");
-                            }
-                            await using var fstream = new FileStream(imageSavePath, FileMode.Create);
-                            await (await asyncResponse.Content.ReadAsStreamAsync()).CopyToAsync(fstream)
-                                .ConfigureAwait(false);
-                        }
-                        Progress++;
-                        return;
-                    }
-                    catch (Exception)
-                    {
-                        if (i == 1 || cts.IsCancellationRequested) throw;
-                        // if there's a some timeout or connection error, wait random amount of time before trying again
-                        await Task.Delay(new Random().Next(500, 3000)).ConfigureAwait(false);
-                    }
-                }
+                await TryDownloadAsync(image.Url, imageSavePath);
             }
             catch (Exception e)
             { // notify about the exception
                 OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.ExceptionRaised, e.Message));
+            }
+        }
+
+        private async Task TryDownloadAsync(string imgUrl, string imageSavePath)
+        {
+            for (var i = _downloadAttempts; i > 0; i--)
+            {   // if download fails, try to download again
+                try
+                {
+                    using (var asyncResponse = await Client.GetAsync(imgUrl, cts.Token).ConfigureAwait(false))
+                    {
+                        if (asyncResponse.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            // TODO: fix this later; handle this error somehow, like try to auth again
+                            i = 1;
+                            throw new Exception("API token expired");
+                        }
+                        await using var fstream = new FileStream(imageSavePath, FileMode.Create);
+                        await (await asyncResponse.Content.ReadAsStreamAsync()).CopyToAsync(fstream)
+                            .ConfigureAwait(false);
+                    }
+                    Progress++;
+                    return;
+                }
+                catch (Exception)
+                {
+                    if (i == 1 || cts.IsCancellationRequested) throw;
+                    // if there's a some timeout or connection error, wait random amount of time before trying again
+                    await Task.Delay(new Random().Next(500, 3000)).ConfigureAwait(false);
+                }
             }
         }
         /// <summary>
@@ -217,13 +217,12 @@ namespace ArtAPI
         /// <param name="artistName">name of the artist</param>
         protected void CreateSaveDir(string artistName)
         {
-            ArtistDirSavepath = Path.Combine(SavePath, artistName);
-            Directory.CreateDirectory(ArtistDirSavepath);
+            _artistDirSavepath = Path.Combine(SavePath, artistName);
+            Directory.CreateDirectory(_artistDirSavepath);
         }
         private void Clear()
         {
             _progress = 0;
-            CurrentState = null;
             cts?.Dispose();
             ImagesToDownload.Clear();
         }
@@ -232,18 +231,8 @@ namespace ArtAPI
         /// </summary>
         private void CheckLocalImages()
         {
-            var localImages = Directory.GetFiles(ArtistDirSavepath).Select(Path.GetFileNameWithoutExtension).ToArray();
-            ImagesToDownload.RemoveAll(image => localImages.Contains($"{NormalizeFileName(image.Name)}_{image.ID}"));
-        }
-        /// <summary>
-        /// remove all the nasty characters that can cause trouble
-        /// </summary>
-        /// <returns>normalized file name</returns>
-        private string NormalizeFileName(string filename)
-        {
-            var specialChars = new List<string>() { @"\", "/", ":", "*", "?", "\"", "<", ">", "|" };
-            specialChars.ForEach(c => filename = filename.Replace(c, ""));
-            return filename;
+            var localImages = Directory.GetFiles(_artistDirSavepath).Select(Path.GetFileNameWithoutExtension).ToArray();
+            ImagesToDownload.RemoveAll(image => localImages.Contains($"{General.NormalizeFileName(image.Name)}_{image.ID}"));
         }
 
         public void CancelDownload()
@@ -257,15 +246,29 @@ namespace ArtAPI
             catch (ObjectDisposedException)
             { }
         }
+        /// <summary>
+        /// public method which will be used to download images
+        /// </summary>
+        /// <param name="artistUrl">artist profile url</param>
         public virtual async Task GetImagesAsync(string artistUrl)
         {
             await GetImagesAsync(new Uri(artistUrl)).ConfigureAwait(false);
         }
+        /// <summary>
+        /// public method which will be used to download images
+        /// </summary>
+        /// <param name="artistUrl">Uri object with artist profile url</param>
         public abstract Task GetImagesAsync(Uri artistUrl);
+
+        /// <summary>
+        /// creates API-URL from given username
+        /// </summary>
+        /// <param name="artistName">user name of an artist</param>
+        /// <returns>URL with which an API request can be created</returns>
         public abstract Task<Uri> CreateUrlFromName(string artistName);
         public abstract Task<bool> CheckArtistExistsAsync(string artistName);
         protected abstract Task GetImagesMetadataAsync(string apiUrl);
-        public virtual Task<bool> auth(string refreshToken) => Task.FromResult(true);
-        public virtual Task<string> login(string username, string password) => Task.FromResult("");
+        public virtual Task<bool> Auth(string refreshToken) => Task.FromResult(true);
+        public virtual Task<string> Login(string username, string password) => Task.FromResult("");
     }
 }

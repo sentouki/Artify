@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ArtAPI;
 using Newtonsoft.Json;
 
-namespace Artify
+namespace Artify.Models
 {
     public enum InputType
     {
@@ -22,7 +22,7 @@ namespace Artify
     public class ArtifyModel
     {
         private readonly string SettingsDirPath, SettingsFilePath;
-        private IRequestArt _platform;
+        private RequestArt _platform;
         private readonly Dictionary<string, Regex> URLpattern = new Dictionary<string, Regex>()
         {
             {"general", new Regex(@"(https?://)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}(\/?[a-zA-Z0-9]*\/?)*") },
@@ -31,13 +31,13 @@ namespace Artify
             {"deviantart", new Regex(@"(https://)?(www\.)?deviantart\.com/[0-9a-zA-Z]+/?")}
         };
         // container for the classes
-        private readonly Dictionary<string, Func<IRequestArt>> ArtPlatform = new Dictionary<string, Func<IRequestArt>>()
+        private readonly Dictionary<string, Func<RequestArt>> ArtPlatform = new Dictionary<string, Func<RequestArt>>()
         {
             { "artstation", () => new ArtStationAPI() },
             { "pixiv", () => new PixivAPI() },
             { "deviantart", () => new DeviantArtAPI()}
         };
-        public IRequestArt Platform
+        public RequestArt Platform
         {
             get => _platform;
             set
@@ -52,6 +52,7 @@ namespace Artify
             get => settings.last_used_savepath ?? Environment.GetFolderPath((Environment.SpecialFolder.MyPictures));  // set the default dir for images
             set => Platform.SavePath = settings.last_used_savepath = value;
         }
+
         private string _selectedPlatform;
         public Settings settings = new Settings();
         public ArtifyModel()
@@ -156,10 +157,10 @@ namespace Artify
 
         public async Task<bool> Auth()
         {
-            if (_selectedPlatform != "pixiv") return await Platform.auth(null);
+            if (_selectedPlatform != "pixiv") return await Platform.Auth(null);
             if (settings.pixiv_refresh_token is { } token && !string.IsNullOrWhiteSpace(token))
             {
-                return await Platform.auth(token);
+                return await Platform.Auth(token);
             }
             return false;
         }

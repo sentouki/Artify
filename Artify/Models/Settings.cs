@@ -1,4 +1,4 @@
-﻿namespace Artify
+﻿namespace Artify.Models
 {
     public class Settings
     {

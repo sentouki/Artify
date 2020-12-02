@@ -27,10 +27,11 @@
                 </Button>
             </StackPanel>
         </Grid>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible">
         <StackPanel Grid.Row="1" Orientation="Vertical">
-            <Border Padding="5" BorderBrush="DarkSlateGray" BorderThickness="0,0,0,1">
+            <Border Padding="5" BorderBrush="DarkSlateGray" BorderThickness="0,0,0,1" Margin="0,5">
                 <StackPanel>
-                    <Label Content="Save Location" Foreground="white" FontSize="16"/>
+                    <Label Content="Save Location" Foreground="white" FontSize="18"/>
                     <Grid>
                         <Label Name="path" Content="{Binding SaveLocation, Mode=TwoWay}" Foreground="White" VerticalAlignment="Center"/>
                         <Button Style="{StaticResource MaterialButtonStyle }" HorizontalAlignment="Right" Margin="5" Content="Open" Height="40" Width="65" FontSize="14" Click="OpenClick" />
@@ -43,28 +44,53 @@
                     </StackPanel.Style>
                 </StackPanel>
             </Border>
-            <Border Padding="5" BorderBrush="DarkSlateGray" BorderThickness="0,0,0,1">
+                <Border Padding="5" BorderBrush="DarkSlateGray" BorderThickness="0,0,0,1" Margin="0,5">
                 <Border.Style>
                     <Style TargetType="{x:Type Border}">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding LoginStatus}" Value="True">
-                                <Setter Property="Visibility" Value="Hidden"/>
+                            <DataTrigger Binding="{Binding IsLoggedIn}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding LoginStatus}" Value="False">
+                            <DataTrigger Binding="{Binding IsLoggedIn}" Value="False">
                                 <Setter Property="Visibility" Value="Visible"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
                 <StackPanel>
-                    <Label Content="Pixiv Login" Foreground="white" FontSize="16"/>
+                    <Label Content="Pixiv Login" Foreground="white" FontSize="18"/>
                     <Label Content="Username" Foreground="white" FontSize="10" Margin="5,0,0,-10"/>
-                    <TextBox Name="username" Style="{StaticResource InputFieldStyle}" Text="{Binding UserName}" Margin="10" Tag="{Binding IsLoginInputValid, Mode=TwoWay}" GotFocus="InputFieldGotFocus"/>
+                        <TextBox Name="username" Style="{StaticResource InputFieldStyle}" Text="{Binding UserName}" Margin="10" Tag="{Binding IsLoginInputValid, Mode=TwoWay}" GotFocus="InputFieldGotFocus"/>
                     <Label Content="Password" Foreground="white" FontSize="10" Margin="5,-10"/>
-                    <PasswordBox Name="password" Style="{StaticResource PasswordInputFieldStyle}" Margin="10" Tag="{Binding IsLoginInputValid, Mode=TwoWay}" PasswordChanged="PasswordBox_PasswordChanged" GotFocus="InputFieldGotFocus"/>
-                    <Button Name="LoginButton" Style="{StaticResource MaterialButtonStyle}" Content="Login" Margin="100,15" FontSize="20" Command="{Binding LoginCommand}" Click="LoginButtonClick"/>
+                        <PasswordBox Name="password" Style="{StaticResource PasswordInputFieldStyle}" Margin="10" Tag="{Binding IsLoginInputValid, Mode=TwoWay}" PasswordChanged="PasswordBox_PasswordChanged" GotFocus="InputFieldGotFocus"/>
+                    <Label Content="{Binding LoginNotification}" HorizontalAlignment="Center" FontSize="15" Foreground="Tomato"/>
+                    <Button Name="LoginButton" Style="{StaticResource MaterialButtonStyle}" Content="Login" Margin="100,5,100,15" FontSize="20" Command="{Binding LoginCommand}" Click="LoginButtonClick" IsEnabled="{Binding IsLoginButtonEnabled, Mode=TwoWay}"/>
+                </StackPanel>
+            </Border>
+                <Border Padding="5" BorderBrush="DarkSlateGray" BorderThickness="0,0,0,1" Margin="0,5">
+                <StackPanel>
+                    <Label Content="Download Settings" Foreground="white" FontSize="18"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Column="0" Grid.Row="0" Content="Concurrent Tasks" Foreground="white" FontSize="15" Margin="5,0" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"/>
+                        <TextBox Grid.Column="1" Grid.Row="0" Style="{StaticResource InputFieldStyle}" Text="{Binding ConcurrentTasks, Mode=TwoWay}" Margin="10" HorizontalContentAlignment="Center" PreviewTextInput="TextBox_PreviewTextInput" PreviewKeyDown="TextBox_PreviewKeyDown"/>
+                        <Label Grid.Column="0" Grid.Row="1" Content="Download Attempts" Foreground="white" FontSize="15" Margin="5,0" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"/>
+                            <TextBox Grid.Column="1" Grid.Row="1" Style="{StaticResource InputFieldStyle}" Text="{Binding DownloadAttempts, Mode=TwoWay}" Margin="10" HorizontalContentAlignment="Center" PreviewTextInput="TextBox_PreviewTextInput" PreviewKeyDown="TextBox_PreviewKeyDown"/>
+                        <Label Grid.Column="0" Grid.Row="2" Content="Timeout (s)" Foreground="white" FontSize="15" Margin="5,0" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"/>
+                            <TextBox Grid.Column="1" Grid.Row="2" Style="{StaticResource InputFieldStyle}" Text="{Binding ClientTimeout, Mode=TwoWay}" Margin="10" HorizontalContentAlignment="Center" PreviewTextInput="TextBox_PreviewTextInput" PreviewKeyDown="TextBox_PreviewKeyDown"/>
+                    </Grid>
                 </StackPanel>
             </Border>
         </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Window>

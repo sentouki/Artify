@@ -1,6 +1,6 @@
 ﻿using PropertyChanged;
 
-namespace Artify
+namespace Artify.ViewModels
 {
     [AddINotifyPropertyChangedInterface]
     public class BaseViewModel

@@ -10,6 +10,12 @@ namespace ArtAPI
         private const string ApiUrl = @"https://artstation.com/users/{0}/projects?page=";
         private const string AssetsUrl = @"https://www.artstation.com/projects/{0}.json";
 
+        public ArtStationAPI()
+        {
+            IsLoggedIn = true;
+            LoginState = LoginStatus.LoggedIn;
+        }
+
         public override Task<Uri> CreateUrlFromName(string artistName)
         {
             return Task.FromResult(new Uri(string.Format($@"https://www.artstation.com/{artistName}")));
@@ -55,7 +61,7 @@ namespace ArtAPI
             var t = Task.WhenAll(allPages.Select(project => Task.Run(async () => { await GetAssets(project["hash_id"].ToString(), project["title"].ToString()).ConfigureAwait(false); })).ToArray());
             try { await t.ConfigureAwait(false); }
             catch (Exception e)
-            { OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadCanceled, e.Message)); return; }
+            { OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadCanceled, e.Message)); }
         }
 
         // get all the images from a project

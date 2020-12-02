@@ -3,10 +3,10 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using ArtAPI;
+using Artify.ViewModels;
 using Artify.ViewModels.misc;
-using Artify.Views;
 
-namespace Artify
+namespace Artify.Views
 {
     public partial class MainWindow : Window, IShutDown
     {
@@ -17,6 +17,7 @@ namespace Artify
             ShowSelectionMenuAnimation;
 
         private SettingsPopUp popUp;
+        private readonly ArtifyViewModel _artifyVM = new ArtifyViewModel();
 
         public MainWindow()
         {
@@ -30,6 +31,7 @@ namespace Artify
             MaxHeight = SystemParameters.WorkArea.Height + 10;
             MaxWidth = SystemParameters.WorkArea.Width + 10;
             Opacity = 0;
+            DataContext = _artifyVM;
             ResizeButton.DataContext = this;
         }
 
@@ -45,7 +47,11 @@ namespace Artify
         }
         private void SettingsClick(object sender, RoutedEventArgs e)
         {
-            popUp = new SettingsPopUp(this);
+            popUp = new SettingsPopUp
+            {
+                Owner = this,
+                DataContext = _artifyVM.CreateSettingsVM()
+            };
             popUp.ShowDialog();
         }
 
@@ -141,7 +147,7 @@ namespace Artify
 
         public void AppShutDown(object state)
         {
-            var _state = (State?)state;
+            var _state = (State)state;
             if (_state == State.DownloadPreparing | _state == State.DownloadRunning)
                 if (MessageBox.Show("Are you sure?", "warning", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
             DataContext = null;
