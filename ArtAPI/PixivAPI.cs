@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using ArtAPI.misc;
 
 namespace ArtAPI
 {
@@ -54,7 +55,7 @@ namespace ArtAPI
         private async Task<string> GetArtistID(string artistName)
         {
             if (!IsLoggedIn) return null;
-            var response = await Client.GetStringAsync(string.Format(UserSearchUrl, artistName)).ConfigureAwait(false);
+            var response = await Client.GetStringAsyncM(string.Format(UserSearchUrl, artistName)).ConfigureAwait(false);
             var searchResults = JObject.Parse(response);
             if (!searchResults["user_previews"].HasValues) return null;
             var artistID = searchResults["user_previews"][0]["user"]["id"].ToString();
@@ -62,7 +63,7 @@ namespace ArtAPI
         }
         private async Task<string> GetArtistName(string artistID)
         {
-            var response = await Client.GetStringAsync(string.Format(ArtistDetails, artistID)).ConfigureAwait(false);
+            var response = await Client.GetStringAsyncM(string.Format(ArtistDetails, artistID)).ConfigureAwait(false);
             return JObject.Parse(response)["body"]["user_details"]["user_name"].ToString();
         }
 
@@ -93,7 +94,7 @@ namespace ArtAPI
         {
             // to store the IDs of each project
             var tasks = new List<Task>();
-            var rawResponse = await Client.GetStringAsync(apiUrl).ConfigureAwait(false);
+            var rawResponse = await Client.GetStringAsyncM(apiUrl).ConfigureAwait(false);
             var responseJson = JObject.Parse(rawResponse);
             if (!IsLoggedIn)
             {
@@ -115,7 +116,7 @@ namespace ArtAPI
                         })
                     );
                     if (string.IsNullOrEmpty(responseJson["next_url"].ToString())) break;
-                    rawResponse = await Client.GetStringAsync(responseJson["next_url"].ToString()).ConfigureAwait(false);
+                    rawResponse = await Client.GetStringAsyncM(responseJson["next_url"].ToString()).ConfigureAwait(false);
                     responseJson = JObject.Parse(rawResponse);
                 }
             }
@@ -130,7 +131,7 @@ namespace ArtAPI
 
         private async Task GetImageURLsWithoutLoginAsync(string illustProject)
         {
-            var response = await Client.GetStringAsync(illustProject).ConfigureAwait(false);
+            var response = await Client.GetStringAsyncM(illustProject).ConfigureAwait(false);
             var illustDetails = JObject.Parse(response)["body"]["illust_details"];
             if (Int32.Parse(illustDetails["page_count"].ToString()) > 1)
             {

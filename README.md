@@ -1,5 +1,7 @@
 # Artify ![Artify](https://raw.githubusercontent.com/sentouki/Artify/master/Artify/assets/icons/artify.png)
+[![Download Artify](https://img.shields.io/sourceforge/dt/artify.svg)](https://sourceforge.net/projects/artify/files/latest/download)
 ###### a fun project of mine
+
 ## Description
 Artify allows you to easily download artwork of an artist from a platform of your choice.  
 The App uses ArtAPI lib which is also part of this project.
@@ -8,7 +10,7 @@ The App uses ArtAPI lib which is also part of this project.
 You can download the [precompiled version](https://github.com/sentouki/Artify/releases) or clone this repo and build it yourself  
 It is very easy to use, just choose a platform, paste a URL of the profile of an artist or artist's name (or Pixiv ID)  
 and press **Download**    
-Press ***ESC*** to select another platform
+Press ***ESC*** or click on the platform logo to select another platform
 
 #### Available platforms
 - [x] ArtStation
@@ -23,7 +25,7 @@ Press ***ESC*** to select another platform
 
 #### Running the app
 - [.NET Core 3.1 Runtime](https://dotnet.microsoft.com/download/visual-studio-sdks)
-- or download the [self-contained version](https://github.com/sentouki/Artify/releases/download/v1.5.0/Artify_v1.5.0.selfcontained.zip)
+- or download the [self-contained version](https://github.com/sentouki/Artify/releases/download/v1.5.1/Artify_v1.5.1.selfcontained.zip)
 
 #### Building the app
 - [.NET Core 3.1 SDK](https://dotnet.microsoft.com/download/visual-studio-sdks)

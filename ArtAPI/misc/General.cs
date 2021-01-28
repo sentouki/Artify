@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+
 #pragma warning disable CA5351
 
-namespace ArtAPI
+namespace ArtAPI.misc
 {
     public static class General
     {

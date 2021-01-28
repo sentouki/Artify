@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using ArtAPI;
+using ArtAPI.misc;
 using Artify.Models;
 using Artify.ViewModels.misc;
 
@@ -40,7 +40,7 @@ namespace Artify.ViewModels
         {
             artifyModel.UpdateSettings();
             CancelDownload();
-            view.AppShutDown(_currentState);
+            view.AppShutDown();
         }
 
         public SettingsViewModel CreateSettingsVM()

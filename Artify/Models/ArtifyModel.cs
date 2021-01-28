@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -51,6 +52,21 @@ namespace Artify.Models
         {
             get => settings.last_used_savepath ?? Environment.GetFolderPath((Environment.SpecialFolder.MyPictures));  // set the default dir for images
             set => Platform.SavePath = settings.last_used_savepath = value;
+        }
+        public int ClientTimeout
+        {
+            get => settings.timeout > 0 ? settings.timeout : Platform.ClientTimeout;
+            set => Platform.ClientTimeout = settings.timeout = value;
+        }
+        public int DownloadAttempts
+        {
+            get => settings.download_attempts > 0 ? settings.download_attempts : Platform.DownloadAttempts;
+            set => Platform.DownloadAttempts = settings.download_attempts = value;
+        }
+        public int ConcurrentTasks
+        {
+            get => settings.concurrent_tasks > 0 ? settings.concurrent_tasks : Platform.ConcurrentTasks;
+            set => Platform.ConcurrentTasks = settings.concurrent_tasks = value;
         }
 
         private string _selectedPlatform;
@@ -153,6 +169,9 @@ namespace Artify.Models
             Platform = ArtPlatform[platformName]();  // create object of the selected platform
             _selectedPlatform = platformName;
             Platform.SavePath = SavePath;
+            Platform.ClientTimeout = ClientTimeout;
+            Platform.ConcurrentTasks = ConcurrentTasks;
+            Platform.DownloadAttempts = DownloadAttempts;
         }
 
         public async Task<bool> Auth()

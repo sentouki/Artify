@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using ArtAPI;
+using ArtAPI.misc;
 using Artify.Models;
 
 namespace Artify.ViewModels
@@ -10,7 +10,7 @@ namespace Artify.ViewModels
         public string UserName { get; set; }
         public string UserPassword { private get; set; }
         public bool IsLoginInputValid { get; set; } = true;
-        public bool IsLoginButtonEnabled { get; set; } = true;
+        public bool IsInputEnabled { get; set; } = true;
         public string LoginNotification { get; set; }
         public string SaveLocation
         {
@@ -19,18 +19,18 @@ namespace Artify.ViewModels
         }
         public int ClientTimeout
         {
-            get => _artifyModel.Platform.ClientTimeout;
-            set => _artifyModel.Platform.ClientTimeout = value;
+            get => _artifyModel.ClientTimeout;
+            set => _artifyModel.ClientTimeout = value > 0 ? value : 1;
         }
         public int DownloadAttempts
         {
-            get => _artifyModel.Platform.DownloadAttempts;
-            set => _artifyModel.Platform.DownloadAttempts = value;
+            get => _artifyModel.DownloadAttempts;
+            set => _artifyModel.DownloadAttempts = value > 0 ? value : 1;
         }
         public int ConcurrentTasks
         {
-            get => _artifyModel.Platform.ConcurrentTasks;
-            set => _artifyModel.Platform.ConcurrentTasks = value;
+            get => _artifyModel.ConcurrentTasks;
+            set => _artifyModel.ConcurrentTasks = value > 0 ? value : 1;
         }
 
         public bool IsLoggedIn { get; set; }
@@ -41,6 +41,10 @@ namespace Artify.ViewModels
             _artifyModel.Platform.LoginStatusChanged += Platform_LoginStatusChanged;
             Platform_LoginStatusChanged(this, new LoginStatusChangedEventArgs(_artifyModel.Platform.LoginState));
             LoginCommand = new RelayCommand(async () => await Login());
+            if (_artifyModel.Platform.CurrentState == State.DownloadRunning)
+            {
+                IsInputEnabled = false;
+            }
         }
         ~SettingsViewModel()
         {
@@ -52,20 +56,21 @@ namespace Artify.ViewModels
             switch (e.Status)
             {
                 case LoginStatus.LoggingIn:
-                    IsLoginButtonEnabled = false;
+                    IsInputEnabled = false;
                     LoginNotification = "Logging in ...";
                     break;
                 case LoginStatus.Authenticating:
-                    IsLoginButtonEnabled = false;
+                    IsInputEnabled = false;
                     LoginNotification = "Authenticating ...";
                     break;
                 case LoginStatus.LoggedIn:
+                    IsInputEnabled = true;
                     LoginNotification = "";
                     IsLoggedIn = true;
                     break;
                 case LoginStatus.Failed:
                     LoginNotification = "Authenticating failed";
-                    IsLoginButtonEnabled = true;
+                    IsInputEnabled = true;
                     break;
             }
         }
@@ -73,7 +78,7 @@ namespace Artify.ViewModels
         private async Task Login()
         {
             if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(UserPassword)) return;
-            IsLoginButtonEnabled = false;
+            IsInputEnabled = false;
             if (await _artifyModel.Platform.Login(UserName, UserPassword) is { } result)
             {
                 _artifyModel.settings.pixiv_refresh_token = result;
@@ -85,7 +90,7 @@ namespace Artify.ViewModels
                 LoginNotification = "Incorrect username or password";
             }
             UserPassword = null;
-            IsLoginButtonEnabled = true;
+            IsInputEnabled = true;
         }
     }
 }

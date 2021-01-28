@@ -145,11 +145,8 @@ namespace Artify.Views
             popUp?.Close();
         }
 
-        public void AppShutDown(object state)
+        public void AppShutDown()
         {
-            var _state = (State)state;
-            if (_state == State.DownloadPreparing | _state == State.DownloadRunning)
-                if (MessageBox.Show("Are you sure?", "warning", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
             DataContext = null;
             GC.Collect(2);
             GC.WaitForPendingFinalizers();

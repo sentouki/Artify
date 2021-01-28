@@ -6,6 +6,8 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using ArtAPI.misc;
+using DownloadProgressChangedEventArgs = ArtAPI.misc.DownloadProgressChangedEventArgs;
 
 namespace ArtAPI
 {
@@ -18,25 +20,20 @@ namespace ArtAPI
             _concurrentTasks = 15;
         private string _artistDirSavepath;
         private int _progress;
-        private CancellationTokenSource cts;
+        private readonly TimeoutHandler _handler;
+        private CancellationTokenSource _cts;
         #endregion
         #region protected fields
         protected HttpClient Client { get; }
-        protected HttpClientHandler Handler { get; }
         protected virtual string Header { get; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36";
         protected List<ImageModel> ImagesToDownload { get; } = new List<ImageModel>();
         #endregion
-
         #region public properties
 
         public int ClientTimeout
         {
             get => _clientTimeout;
-            set
-            {
-                _clientTimeout = value > 0 ? value : 1;
-                Client.Timeout = new TimeSpan(0, 0, _clientTimeout);
-            }
+            set => _clientTimeout = value > 0 ? value : 1;
         }
         public int DownloadAttempts
         {
@@ -81,26 +78,28 @@ namespace ArtAPI
         #region ctor & dtor
         protected RequestArt()
         {
-            Handler = new HttpClientHandler()
+            _handler = new TimeoutHandler()
             {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+                InnerHandler = new HttpClientHandler()
+                {
+                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+                }
             };
-            Client = new HttpClient(Handler);
+            Client = new HttpClient(_handler);
             Client.DefaultRequestHeaders.Add("User-Agent", Header);
             Client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
-            Client.Timeout = new TimeSpan(0, 0, _clientTimeout);
+            Client.Timeout = Timeout.InfiniteTimeSpan;
         }
         ~RequestArt()
         {
-
             Client?.Dispose();
-            Handler?.Dispose();
+            _handler?.Dispose();
         }
         #endregion
         #region Event handler
         public event EventHandler<DownloadStateChangedEventArgs> DownloadStateChanged;
         public event EventHandler<DownloadProgressChangedEventArgs> DownloadProgressChanged;
-        public event EventHandler<LoginStatusChangedEventArgs> LoginStatusChanged; 
+        public event EventHandler<LoginStatusChangedEventArgs> LoginStatusChanged;
         protected void OnDownloadProgressChanged(DownloadProgressChangedEventArgs e)
         {
             DownloadProgressChanged?.Invoke(this, e);
@@ -134,7 +133,7 @@ namespace ArtAPI
             }
             CheckLocalImages();
             OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadRunning, TotalImageCount: TotalImageCount));
-            cts = new CancellationTokenSource();
+            _cts = new CancellationTokenSource();
             var ss = new SemaphoreSlim(_concurrentTasks);
             var t = Task.WhenAll(ImagesToDownload.Select(image => Task.Run(async () =>
             {
@@ -155,7 +154,7 @@ namespace ArtAPI
             }
             finally
             {
-                OnDownloadStateChanged(!cts.IsCancellationRequested
+                OnDownloadStateChanged(!_cts.IsCancellationRequested
                     ? new DownloadStateChangedEventArgs(State.DownloadCompleted, FailedDownloads: FailedDownloads)
                     : new DownloadStateChangedEventArgs(State.DownloadCanceled, FailedDownloads: FailedDownloads));
                 ss.Dispose();
@@ -176,6 +175,10 @@ namespace ArtAPI
             {
                 await TryDownloadAsync(image.Url, imageSavePath);
             }
+            catch (TimeoutException)
+            {
+                OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.ExceptionRaised, "Timeout"));
+            }
             catch (Exception e)
             { // notify about the exception
                 OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.ExceptionRaised, e.Message));
@@ -188,7 +191,9 @@ namespace ArtAPI
             {   // if download fails, try to download again
                 try
                 {
-                    using (var asyncResponse = await Client.GetAsync(imgUrl, cts.Token).ConfigureAwait(false))
+                    using var request = new HttpRequestMessage(HttpMethod.Get, imgUrl);
+                    request.SetTimeout(new TimeSpan(0, 0, ClientTimeout)); // set the timeout for every request separately
+                    using (var asyncResponse = await Client.SendAsync(request, _cts.Token).ConfigureAwait(false))
                     {
                         if (asyncResponse.StatusCode == HttpStatusCode.Unauthorized)
                         {
@@ -205,7 +210,7 @@ namespace ArtAPI
                 }
                 catch (Exception)
                 {
-                    if (i == 1 || cts.IsCancellationRequested) throw;
+                    if (i == 1 || _cts.IsCancellationRequested) throw;
                     // if there's a some timeout or connection error, wait random amount of time before trying again
                     await Task.Delay(new Random().Next(500, 3000)).ConfigureAwait(false);
                 }
@@ -223,7 +228,7 @@ namespace ArtAPI
         private void Clear()
         {
             _progress = 0;
-            cts?.Dispose();
+            _cts?.Dispose();
             ImagesToDownload.Clear();
         }
         /// <summary>
@@ -239,7 +244,7 @@ namespace ArtAPI
         {
             try
             {
-                cts?.Cancel();
+                _cts?.Cancel();
                 OnDownloadStateChanged(new DownloadStateChangedEventArgs(State.DownloadCanceled,
                     FailedDownloads: FailedDownloads));
             }

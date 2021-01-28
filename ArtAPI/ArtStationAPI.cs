@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Linq;
+using ArtAPI.misc;
 using Newtonsoft.Json.Linq;
 
 namespace ArtAPI
@@ -42,7 +43,7 @@ namespace ArtAPI
             var settings = new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Concat };
             try
             {
-                string rawResponse = await Client.GetStringAsync(apiUrl).ConfigureAwait(false);
+                string rawResponse = await Client.GetStringAsyncM(apiUrl).ConfigureAwait(false);
                 var responseJson = JObject.Parse(rawResponse);
                 int totalCount = Int32.Parse(responseJson["total_count"]?.ToString() ?? throw new Exception("Bad API Response"));
                 var pages = (totalCount / 50) + 1;
@@ -50,7 +51,7 @@ namespace ArtAPI
                 allPages = (JContainer)responseJson["data"]; // add the first page to the container
                 for (int page = pages; page > 1; page--)     // go through the remaining pages and add them to the container
                 {
-                    rawResponse = await Client.GetStringAsync(apiUrl + $"{page}").ConfigureAwait(false);
+                    rawResponse = await Client.GetStringAsyncM(apiUrl + $"{page}").ConfigureAwait(false);
                     allPages.Merge((JContainer)JObject.Parse(rawResponse)["data"], settings);
                 }
             }
@@ -67,7 +68,7 @@ namespace ArtAPI
         // get all the images from a project
         private async Task GetAssets(string hash_id, string name)
         {
-            var response = await Client.GetStringAsync(string.Format(AssetsUrl, hash_id)).ConfigureAwait(false);
+            var response = await Client.GetStringAsyncM(string.Format(AssetsUrl, hash_id)).ConfigureAwait(false);
             var assetsJson = JObject.Parse(response);
             foreach (var image in assetsJson["assets"] as JContainer)
             {

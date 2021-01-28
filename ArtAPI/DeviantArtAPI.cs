@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ArtAPI.misc;
 using Newtonsoft.Json.Linq;
 
 namespace ArtAPI
@@ -53,7 +55,7 @@ namespace ArtAPI
 
             while (true)
             {
-                var rawResponse = await Client.GetStringAsync(apiUrl + paginationOffset).ConfigureAwait(false);
+                var rawResponse = await Client.GetStringAsyncM(apiUrl + paginationOffset).ConfigureAwait(false);
                 var responseJson = JObject.Parse(rawResponse);
                 var Gallery = (JContainer)responseJson["results"];
                 if (!(Gallery.HasValues)) return;     // check if the user has any images in his gallery
@@ -91,12 +93,12 @@ namespace ArtAPI
         {
             try
             {
-                var rawResponse = await Client.GetStringAsync(string.Format(ORIGINIMAGE_URL, deviationID))
-                                                    .ConfigureAwait(false);
+                var rawResponse = await Client.GetStringAsyncM(string.Format(ORIGINIMAGE_URL, deviationID))
+                    .ConfigureAwait(false);
                 var responseJson = JObject.Parse(rawResponse);
                 return responseJson["src"].ToString();
             }
-            catch (HttpRequestException)
+            catch (Exception)
             {
                 return null;
             }

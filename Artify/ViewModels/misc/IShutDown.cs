@@ -5,6 +5,6 @@
     /// </summary>
     public interface IShutDown
     {
-        void AppShutDown(object param=null);
+        void AppShutDown();
     }
 }
