@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using ArtAPI.misc;
 
@@ -11,6 +12,7 @@ namespace ArtAPI
     public sealed class PixivAPI : RequestArt
     {
         private const string
+            LOGIN_URL = @"https://app-api.pixiv.net/web/v1/login?{0}",
             AUTH_URL = @"https://oauth.secure.pixiv.net/auth/token",
             LOGIN_SECRET = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c",
             APIUrlWithLogin = @"https://app-api.pixiv.net/v1/user/illusts?user_id={0}",
@@ -19,13 +21,16 @@ namespace ArtAPI
             IllustProjectUrl = @"https://www.pixiv.net/touch/ajax/illust/details?illust_id={0}", // one project can contain multiple illustrations
             ArtistDetails = @"https://www.pixiv.net/touch/ajax/user/details?id={0}";
 
-        private string _artistName;
+        private string _artistName, code_verifier;
 
         public string RefreshToken { get; private set; }
 
         public PixivAPI()
         {
             Client.DefaultRequestHeaders.Referrer = new Uri("https://www.pixiv.net");
+            Client.DefaultRequestHeaders.UserAgent.Clear();
+            Client.DefaultRequestHeaders.UserAgent.ParseAdd("PixivAndroidApp/5.0.115 (Android 6.0; ArtifyApp)");
+            Client.DefaultRequestHeaders.Host = "oauth.secure.pixiv.net";
         }
 
         public override async Task<Uri> CreateUrlFromName(string artistName)
@@ -133,7 +138,7 @@ namespace ArtAPI
         {
             var response = await Client.GetStringAsyncM(illustProject).ConfigureAwait(false);
             var illustDetails = JObject.Parse(response)["body"]["illust_details"];
-            if (Int32.Parse(illustDetails["page_count"].ToString()) > 1)
+            if (int.Parse(illustDetails["page_count"].ToString()) > 1)
             {
                 foreach (var img_url in illustDetails["manga_a"])
                 {
@@ -168,7 +173,7 @@ namespace ArtAPI
         {
             foreach (var IllustDetails in responseJson["illusts"])
             {
-                if (Int32.Parse(IllustDetails["page_count"].ToString()) > 1)
+                if (int.Parse(IllustDetails["page_count"].ToString()) > 1)
                 {
                     foreach (var img_url in IllustDetails["meta_pages"])
                     {
@@ -209,8 +214,8 @@ namespace ArtAPI
             var clientTime = DateTime.UtcNow.ToString("s") + "+00:00";
             var data = new Dictionary<string, string>()
             {
-                {"client_id", "KzEZED7aC0vird8jWyHM38mXjNTY" },
-                {"client_secret", "W9JZoJe00qPvJsiyCGT3CCtC6ZUtdpKpzMbNlUGP" },
+                {"client_id", "MOBrBDS8blbauoSck0ZfDbtuzpyT" },
+                {"client_secret", "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj" },
                 {"get_secure_url", "1" },
                 {"grant_type", "refresh_token" },
                 {"refresh_token", refreshToken },
@@ -247,19 +252,31 @@ namespace ArtAPI
             OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.LoggedIn));
             return IsLoggedIn = true;
         }
+        /// <summary>
+        /// Creates URL for the OAuth authentication
+        /// </summary>
+        /// <returns>url with authentication params</returns>
+        public string Pkce()
+        {
+            code_verifier = General.UrlsafeToken();
+            var codeChallenge = General.CreateS256(code_verifier);
+            return string.Format(LOGIN_URL,
+                $"code_challenge={codeChallenge}&code_challenge_method=S256&client=pixiv-android");
+        }
 
-        public override async Task<string> Login(string username, string password)
+        public async Task<string> Login(string code)
         {
             OnLoginStatusChanged(new LoginStatusChangedEventArgs(LoginStatus.LoggingIn));
             var clientTime = DateTime.UtcNow.ToString("s") + "+00:00";
             var data = new Dictionary<string, string>()
             {
-                {"client_id", "KzEZED7aC0vird8jWyHM38mXjNTY" },
-                {"client_secret", "W9JZoJe00qPvJsiyCGT3CCtC6ZUtdpKpzMbNlUGP" },
-                {"get_secure_url", "1" },
-                {"grant_type", "password" },
-                {"username", username },
-                {"password", password }
+                {"client_id", "MOBrBDS8blbauoSck0ZfDbtuzpyT" },
+                {"client_secret", "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj" },
+                {"grant_type", "authorization_code" },
+                {"include_policy", "true"},
+                {"code", code},
+                {"code_verifier", code_verifier},
+                {"redirect_uri", "https://app-api.pixiv.net/web/v1/users/auth/pixiv/callback"}
             };
             if (Client.DefaultRequestHeaders.Contains("X-Client-Time"))
             {

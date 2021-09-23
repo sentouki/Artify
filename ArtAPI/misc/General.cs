@@ -29,6 +29,33 @@ namespace ArtAPI.misc
                 return sb.ToString();
             }
         }
+
+        public static string CreateS256(string data)
+        {
+            using var sha256 = SHA256.Create();
+            var hash = sha256.ComputeHash(Encoding.ASCII.GetBytes(data));
+            var hashstr = Convert.ToBase64String(hash);
+            return hashstr.ToUrlSafeString();
+        }
+
+        public static string ToUrlSafeString(this string s)
+        {
+            return s.Replace("=", "").Replace("+", "-").Replace("/", "_");
+        }
+        /// <summary>
+        /// Creates a random URL-safe text string, in Base64 encoding.
+        /// </summary>
+        /// <param name="nbytes">token length in bytes</param>
+        /// <returns>url safe token</returns>
+        public static string UrlsafeToken(int nbytes = 32)
+        {
+            var buffer = new byte[nbytes];
+            new Random().NextBytes(buffer);
+            var token = Convert.ToBase64String(buffer).ToUrlSafeString();
+            return token;
+        }
+
+
         /// <summary>
         /// special characters which cannot be used for file and directory names
         /// </summary>

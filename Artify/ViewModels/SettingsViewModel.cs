@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using ArtAPI;
 using ArtAPI.misc;
 using Artify.Models;
 
@@ -7,10 +8,9 @@ namespace Artify.ViewModels
     public class SettingsViewModel : BaseViewModel
     {
         private readonly ArtifyModel _artifyModel;
-        public string UserName { get; set; }
-        public string UserPassword { private get; set; }
-        public bool IsLoginInputValid { get; set; } = true;
         public bool IsInputEnabled { get; set; } = true;
+        public bool OpenBrowser { get; set; } = false;
+        public string LoginUrl { get; set; }
         public string LoginNotification { get; set; }
         public string SaveLocation
         {
@@ -77,8 +77,10 @@ namespace Artify.ViewModels
 
         private async Task Login()
         {
-            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(UserPassword)) return;
+            var pixiv = (PixivAPI) _artifyModel.Platform;
             IsInputEnabled = false;
+            LoginUrl = pixiv.Pkce();
+            OpenBrowser = true;
             if (await _artifyModel.Platform.Login(UserName, UserPassword) is { } result)
             {
                 _artifyModel.settings.pixiv_refresh_token = result;
@@ -86,10 +88,8 @@ namespace Artify.ViewModels
             }
             else
             {
-                IsLoginInputValid = false;
-                LoginNotification = "Incorrect username or password";
+                LoginNotification = "Something went wrong";
             }
-            UserPassword = null;
             IsInputEnabled = true;
         }
     }

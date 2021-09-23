@@ -59,12 +59,7 @@
                     </Border.Style>
                     <StackPanel>
                         <Label Content="Pixiv Login" Foreground="white" FontSize="18"/>
-                        <Label Content="Username" Foreground="white" FontSize="10" Margin="5,0,0,-10"/>
-                        <TextBox Name="username" Style="{StaticResource InputFieldStyle}" Text="{Binding UserName}" Margin="10" Tag="{Binding IsLoginInputValid, Mode=TwoWay}" GotFocus="InputFieldGotFocus"/>
-                        <Label Content="Password" Foreground="white" FontSize="10" Margin="5,-10"/>
-                        <PasswordBox Name="password" Style="{StaticResource PasswordInputFieldStyle}" Margin="10" Tag="{Binding IsLoginInputValid, Mode=TwoWay}" PasswordChanged="PasswordBox_PasswordChanged" GotFocus="InputFieldGotFocus"/>
-                        <Label Content="{Binding LoginNotification}" HorizontalAlignment="Center" FontSize="15" Foreground="Tomato"/>
-                        <Button Name="LoginButton" Style="{StaticResource MaterialButtonStyle}" Content="Login" Margin="100,5,100,15" FontSize="20" Command="{Binding LoginCommand}" Click="LoginButtonClick" IsEnabled="{Binding IsInputEnabled, Mode=TwoWay}"/>
+                        <Button Name="LoginButton" Style="{StaticResource MaterialButtonStyle}" Content="Login" Margin="100,25,100,15" FontSize="20" Command="{Binding LoginCommand}" Click="LoginButtonClick" IsEnabled="{Binding IsInputEnabled, Mode=TwoWay}"/>
                     </StackPanel>
                 </Border>
                 <Border Padding="5" BorderBrush="DarkSlateGray" BorderThickness="0,0,0,1" Margin="0,5">
