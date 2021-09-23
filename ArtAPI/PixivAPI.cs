@@ -29,8 +29,8 @@ namespace ArtAPI
         {
             Client.DefaultRequestHeaders.Referrer = new Uri("https://www.pixiv.net");
             Client.DefaultRequestHeaders.UserAgent.Clear();
-            Client.DefaultRequestHeaders.UserAgent.ParseAdd("PixivAndroidApp/5.0.115 (Android 6.0; ArtifyApp)");
-            Client.DefaultRequestHeaders.Host = "oauth.secure.pixiv.net";
+            Client.DefaultRequestHeaders.UserAgent.ParseAdd("PixivAndroidApp/5.0.219 (Android 11; Artify)");
+            //Client.DefaultRequestHeaders.Host = "oauth.secure.pixiv.net";
         }
 
         public override async Task<Uri> CreateUrlFromName(string artistName)

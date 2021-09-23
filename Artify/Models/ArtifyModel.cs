@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -18,13 +17,12 @@ namespace Artify.Models
         ArtistNameOrID,
     }
     /// <summary>
-    /// a wrapper around the ArtAPI
+    /// a wrapper singleton around the ArtAPI
     /// </summary>
     public class ArtifyModel
     {
-        private readonly string SettingsDirPath, SettingsFilePath;
-        private RequestArt _platform;
-        private readonly Dictionary<string, Regex> URLpattern = new Dictionary<string, Regex>()
+        private readonly string _settingsDirPath, _settingsFilePath;
+        private readonly Dictionary<string, Regex> _urlPattern = new Dictionary<string, Regex>()
         {
             {"general", new Regex(@"(https?://)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}(\/?[a-zA-Z0-9]*\/?)*") },
             {"artstation", new Regex(@"(https://)?(www\.)?artstation\.com/[0-9a-zA-Z]+/?") },
@@ -38,6 +36,9 @@ namespace Artify.Models
             { "pixiv", () => new PixivAPI() },
             { "deviantart", () => new DeviantArtAPI()}
         };
+        private static ArtifyModel _instance;
+        public static ArtifyModel Instance => _instance ??= new ArtifyModel();
+        private RequestArt _platform;
         public RequestArt Platform
         {
             get => _platform;
@@ -71,10 +72,10 @@ namespace Artify.Models
 
         private string _selectedPlatform;
         public Settings settings = new Settings();
-        public ArtifyModel()
+        private ArtifyModel()
         {
-            SettingsDirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), ".artify");
-            SettingsFilePath = Path.Combine(SettingsDirPath, "settings.json");
+            _settingsDirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), ".artify");
+            _settingsFilePath = Path.Combine(_settingsDirPath, "settings.json");
             if (CheckSettingsDir())
                 LoadSettings();
             else CreateSettingsDir();
@@ -82,14 +83,14 @@ namespace Artify.Models
 
         private bool CheckSettingsDir()
         {
-            return Directory.Exists(SettingsDirPath) && File.Exists(SettingsFilePath);
+            return Directory.Exists(_settingsDirPath) && File.Exists(_settingsFilePath);
         }
         private void LoadSettings()
         {
-            var fi = new FileInfo(SettingsFilePath) { Attributes = FileAttributes.Normal };
+            var fi = new FileInfo(_settingsFilePath) { Attributes = FileAttributes.Normal };
             try
             {
-                using var sr = new StreamReader(SettingsFilePath);
+                using var sr = new StreamReader(_settingsFilePath);
                 var stringJson = sr.ReadToEnd();
                 if (stringJson.Length > 0)
                 {
@@ -104,9 +105,9 @@ namespace Artify.Models
         }
         private void CreateSettingsDir()
         {
-            var di = Directory.CreateDirectory(SettingsDirPath);
+            var di = Directory.CreateDirectory(_settingsDirPath);
             di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
-            File.Create(SettingsFilePath).Close();
+            File.Create(_settingsFilePath).Close();
         }
         public void UpdateSettings()
         {
@@ -116,8 +117,8 @@ namespace Artify.Models
             {
                 settings.pixiv_refresh_token = null;
             }
-            var fi = new FileInfo(SettingsFilePath) { Attributes = FileAttributes.Normal };
-            using (var sw = new StreamWriter(SettingsFilePath))
+            var fi = new FileInfo(_settingsFilePath) { Attributes = FileAttributes.Normal };
+            using (var sw = new StreamWriter(_settingsFilePath))
             {
                 new JsonSerializer().Serialize(sw, settings);
             }
@@ -130,11 +131,11 @@ namespace Artify.Models
         /// <returns>true if it's the right url, false if it's a url but a wrong one, null if neither (e.g. artist name)</returns>
         private bool? CheckUrl(string input)
         {
-            if (!URLpattern["general"].IsMatch(input))
+            if (!_urlPattern["general"].IsMatch(input))
             {
                 return null;
             }
-            return URLpattern[_selectedPlatform].IsMatch(input);
+            return _urlPattern[_selectedPlatform].IsMatch(input);
         }
         /// <summary>
         /// check the user input
@@ -166,7 +167,7 @@ namespace Artify.Models
 
         public void SelectPlatform(string platformName)
         {
-            Platform = ArtPlatform[platformName]();  // create object of the selected platform
+            Platform = ArtPlatform[platformName]();  // create an object of the selected platform
             _selectedPlatform = platformName;
             Platform.SavePath = SavePath;
             Platform.ClientTimeout = ClientTimeout;
@@ -182,6 +183,16 @@ namespace Artify.Models
                 return await Platform.Auth(token);
             }
             return false;
+        }
+
+        public async Task PixivLogin(string code)
+        {
+            var pixiv = (PixivAPI)Platform;
+            if (await pixiv.Login(code) is { } result)
+            {
+                settings.pixiv_refresh_token = result;
+                UpdateSettings();
+            }
         }
     }
 }

@@ -26,8 +26,7 @@ Press ***ESC*** or click on the platform logo to select another platform.
 ## Requirements
 
 #### Running the app
-- [.NET Core 3.1 Runtime](https://download.visualstudio.microsoft.com/download/pr/15885ffa-ab48-4ee1-99a2-4f20e71ce956/06267d73270ed92fb5a8c873ef56045d/dotnet-runtime-3.1.11-win-x64.exe)
-- or download the [self-contained version](https://github.com/sentouki/Artify/releases/download/v1.5.1/Artify_v1.5.1.selfcontained.zip) (.NET Core 3.1 Runtime already included)
+- Download the [latest version](https://github.com/sentouki/Artify/releases/download/v1.5.1/Artify_v1.5.2.selfcontained.zip)
 
 #### Building the app
 - [.NET Core 3.1 SDK](https://dotnet.microsoft.com/download/visual-studio-sdks)

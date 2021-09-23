@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
         mc:Ignorable="d"
         Title="SettingsPopUp" MinHeight="450" MinWidth="400" Height="450" Width="400" MaxHeight="700" MaxWidth="900" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Background="#141414" Opacity="0.99" Style="{StaticResource ArtifyPopUpWindowStyle}" KeyDown="Window_KeyDown">
     <WindowChrome.WindowChrome>
@@ -28,7 +29,7 @@
             </StackPanel>
         </Grid>
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible">
-            <StackPanel Grid.Row="1" Orientation="Vertical">
+            <StackPanel Orientation="Vertical">
                 <Border Padding="5" BorderBrush="DarkSlateGray" BorderThickness="0,0,0,1" Margin="0,5">
                     <StackPanel>
                         <Label Content="Save Location" Foreground="white" FontSize="18"/>
@@ -59,7 +60,7 @@
                     </Border.Style>
                     <StackPanel>
                         <Label Content="Pixiv Login" Foreground="white" FontSize="18"/>
-                        <Button Name="LoginButton" Style="{StaticResource MaterialButtonStyle}" Content="Login" Margin="100,25,100,15" FontSize="20" Command="{Binding LoginCommand}" Click="LoginButtonClick" IsEnabled="{Binding IsInputEnabled, Mode=TwoWay}"/>
+                        <Button Name="LoginButton" Style="{StaticResource MaterialButtonStyle}" Content="Login" Margin="100,25,100,15" FontSize="20" Command="{Binding LoginCommand}" IsEnabled="{Binding IsInputEnabled, Mode=TwoWay}"/>
                     </StackPanel>
                 </Border>
                 <Border Padding="5" BorderBrush="DarkSlateGray" BorderThickness="0,0,0,1" Margin="0,5">
@@ -87,5 +88,23 @@
                 </Border>
             </StackPanel>
         </ScrollViewer>
+        <Grid Grid.Row="1" Background="White">
+            <Label HorizontalAlignment="Center" VerticalAlignment="Center" Content="Loading..." FontSize="20"/>
+            <wpf:ChromiumWebBrowser x:Name="Browser"
+                                    Address="{Binding LoginUrl}">
+            </wpf:ChromiumWebBrowser>
+            <Grid.Style>
+                <Style TargetType="{x:Type Grid}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding OpenBrowser}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding OpenBrowser}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+        </Grid>
     </Grid>
 </Window>

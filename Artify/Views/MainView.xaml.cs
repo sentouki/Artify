@@ -2,12 +2,12 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
-using ArtAPI;
 using Artify.ViewModels;
 using Artify.ViewModels.misc;
 
 namespace Artify.Views
 {
+    // ReSharper disable once RedundantExtendsListEntry
     public partial class MainWindow : Window, IShutDown
     {
         private Storyboard
@@ -49,8 +49,7 @@ namespace Artify.Views
         {
             popUp = new SettingsPopUp
             {
-                Owner = this,
-                DataContext = _artifyVM.CreateSettingsVM()
+                Owner = this
             };
             popUp.ShowDialog();
         }
@@ -67,13 +66,13 @@ namespace Artify.Views
             WindowState = WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal;
         }
 
-        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if ((e.Key == System.Windows.Input.Key.Escape) && SelectionMenu.Visibility == Visibility.Hidden)
+            if ((e.Key == Key.Escape) && SelectionMenu.Visibility == Visibility.Hidden)
             {
                 ShowSelectionMenu();
             }
-            else if ((e.Key == System.Windows.Input.Key.Escape) && SelectionMenu.Visibility == Visibility.Visible && SelectedPlatformIcon.Source != null)
+            else if ((e.Key == Key.Escape) && SelectionMenu.Visibility == Visibility.Visible && SelectedPlatformIcon.Source != null)
             {
                 HideSelectionMenu();
             }

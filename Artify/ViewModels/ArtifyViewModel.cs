@@ -8,7 +8,6 @@ namespace Artify.ViewModels
 {
     public class ArtifyViewModel : BaseViewModel
     {
-        private readonly ArtifyModel artifyModel;
         private State _currentState;
         #region public properties
         public string RunDownloadButtonContent { get; set; } = "Download";
@@ -30,7 +29,6 @@ namespace Artify.ViewModels
         #region ctor
         public ArtifyViewModel()
         {
-            artifyModel = new ArtifyModel();
             RunDownloadCommand = new RelayCommand(RunDownload);
             SelectPlatformCommand = new RelayCommand<string>(SelectPlatform);
             ShutdownCommand = new RelayCommand<IShutDown>(Shutdown);
@@ -38,14 +36,9 @@ namespace Artify.ViewModels
         #endregion
         private void Shutdown(IShutDown view)
         {
-            artifyModel.UpdateSettings();
+            ArtifyModel.Instance.UpdateSettings();
             CancelDownload();
             view.AppShutDown();
-        }
-
-        public SettingsViewModel CreateSettingsVM()
-        {
-            return new SettingsViewModel(artifyModel);
         }
         #region ArtAPI event handler
         private void Platform_DownloadStateChanged(object sender, DownloadStateChangedEventArgs e)
@@ -124,11 +117,11 @@ namespace Artify.ViewModels
                 CancelDownload();
             }
             SelectedPlatform = platform;
-            artifyModel.SelectPlatform(platform);
-            artifyModel.Platform.DownloadProgressChanged += UpdateProgress;
-            artifyModel.Platform.DownloadStateChanged += Platform_DownloadStateChanged;
-            artifyModel.Platform.LoginStatusChanged += PlatformOnLoginStatusChanged;
-            IsLoggedIn = await artifyModel.Auth();
+            ArtifyModel.Instance.SelectPlatform(platform);
+            ArtifyModel.Instance.Platform.DownloadProgressChanged += UpdateProgress;
+            ArtifyModel.Instance.Platform.DownloadStateChanged += Platform_DownloadStateChanged;
+            ArtifyModel.Instance.Platform.LoginStatusChanged += PlatformOnLoginStatusChanged;
+            IsLoggedIn = await ArtifyModel.Instance.Auth();
         }
 
         private async void RunDownload()
@@ -142,7 +135,7 @@ namespace Artify.ViewModels
 #endif
             try
             {
-                switch (await artifyModel.CheckUserInput(UserInput))
+                switch (await ArtifyModel.Instance.CheckUserInput(UserInput))
                 {
                     case InputType.Empty:
                         InputErrorMessage = "Input field cannot be empty!";
@@ -157,10 +150,10 @@ namespace Artify.ViewModels
                         IsInputValid = false;
                         break;
                     case InputType.URL:
-                        await artifyModel.Platform.GetImagesAsync(UserInput);
+                        await ArtifyModel.Instance.Platform.GetImagesAsync(UserInput);
                         break;
                     case InputType.ArtistNameOrID:
-                        await artifyModel.Platform.GetImagesAsync(await artifyModel.Platform.CreateUrlFromName(UserInput));
+                        await ArtifyModel.Instance.Platform.GetImagesAsync(await ArtifyModel.Instance.Platform.CreateUrlFromName(UserInput));
                         break;
                 }
             }
@@ -187,7 +180,7 @@ namespace Artify.ViewModels
 
         private void CancelDownload()
         {
-            artifyModel.Platform?.CancelDownload();
+            ArtifyModel.Instance.Platform?.CancelDownload();
         }
         #endregion
     }
