@@ -26,7 +26,7 @@ Press ***ESC*** or click on the platform logo to select another platform.
 ## Requirements
 
 #### Running the app
-- Download the [latest version](https://github.com/sentouki/Artify/releases/download/v1.5.1/Artify_v1.5.2.selfcontained.zip)
+- Download the [latest version](https://github.com/sentouki/Artify/releases/download/v1.5.2/Artify_v1.5.2.selfcontained.zip)
 
 #### Building the app
 - [.NET Core 3.1 SDK](https://dotnet.microsoft.com/download/visual-studio-sdks)
