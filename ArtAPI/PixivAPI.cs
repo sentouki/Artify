@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,10 +38,24 @@ namespace ArtAPI
             // input may be an ID or a name, so we check first if it's an ID
             if (int.TryParse(artistName, out _))
                 return CreateUrlFromID(artistName);
-            _artistName = artistName;           // this will be needed later to create a directory, so we don't need to look up the name twice
+            _artistName = CleanInput(artistName);           // this will be needed later to create a directory, so we don't need to look up the name twice
             return CreateUrlFromID(await GetArtistID(artistName));
         }
-
+        static string CleanInput(string strIn)
+        {
+            // Replace invalid characters with empty strings.
+            try
+            {
+                return System.Text.RegularExpressions.Regex.Replace(strIn, @"[^\w\.@-]", "",
+                                     System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(1.5));
+            }
+            // If we timeout when replacing invalid characters,
+            // we should return Empty.
+            catch (System.Text.RegularExpressions.RegexMatchTimeoutException)
+            {
+                return String.Empty;
+            }
+        }
         public Uri CreateUrlFromID(string userid)
         {
             return new Uri($@"https://www.pixiv.net/en/users/{userid}");
@@ -69,7 +83,7 @@ namespace ArtAPI
         private async Task<string> GetArtistName(string artistID)
         {
             var response = await Client.GetStringAsyncM(string.Format(ArtistDetails, artistID)).ConfigureAwait(false);
-            return JObject.Parse(response)["body"]["user_details"]["user_name"].ToString();
+            return CleanInput(JObject.Parse(response)["body"]["user_details"]["user_name"].ToString());
         }
 
         public override async Task GetImagesAsync(Uri artistUrl)
